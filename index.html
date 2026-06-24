@@ -844,7 +844,6 @@ document.getElementById('te-pills').addEventListener('click',e=>{const btn=e.tar
 document.getElementById('tm-modal').addEventListener('click',e=>{if(e.target===document.getElementById('tm-modal'))closeTM();});
 
 // Person modal
-let pmCreatingNew=false;
 function switchToNewPerson(){pmCreatingNew=true;document.getElementById('pm-new-wrap').style.display='block';document.getElementById('pm-inp').style.display='none';document.getElementById('pm-ac').style.display='none';setTimeout(()=>document.getElementById('pm-new-inp').focus(),50);}
 function openPM(id,isP,idx){pmId=id;pmIsP=isP;pmIdx=idx;pmCreatingNew=false;const it=items.find(i=>i.id===id);if(!it)return;const cur=isP?(it.persons||[])[idx]||'':it.person||'';document.getElementById('pm-inp').value=cur;document.getElementById('pm-inp').style.display='';document.getElementById('pm-new-wrap').style.display='none';document.getElementById('pm-new-inp').value='';document.getElementById('pm-ac').style.display='none';document.getElementById('pm-modal').classList.add('show');setTimeout(()=>document.getElementById('pm-inp').focus(),50);}
 function closePM(){document.getElementById('pm-modal').classList.remove('show');pmId=null;pmCreatingNew=false;}
