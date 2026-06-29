@@ -535,6 +535,42 @@ table.mt tbody tr:hover td{background:var(--surface2)}
   <!-- LEFT COL -->
   <div class="left-col">
     <div class="mob-section active" id="mob-dash">
+
+      <!-- MEDIEN SIDEBAR SECTION -->
+      <div class="sb-section" style="border-left:3px solid #1A4A8C;background:#E8F0FA11">
+        <div class="sb-hdr" id="sb-hdr-medien" onclick="toggleSB('sb-medien')" style="padding:.5rem .25rem">
+          <div class="sb-icon" style="background:#E8F0FA;color:#1A4A8C;font-size:12px">&#128240;</div>
+          <span class="sb-label" style="color:#1A4A8C">Medien-Board</span>
+          <span id="med-sb-cnt" style="font-size:9px;background:#1A4A8C;color:white;padding:1px 6px;border-radius:10px;font-weight:600;margin-right:3px">0</span>
+          <span class="sb-chev open" id="chev-sb-medien" style="color:#1A4A8C">&#9662;</span>
+        </div>
+        <div class="sb-body open" id="sb-medien">
+          <div class="sb-inner" style="padding:.25rem .25rem .625rem">
+            <!-- Kennzahlen -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:8px">
+              <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:6px;padding:5px 4px;text-align:center">
+                <div style="font-size:16px;font-weight:700;color:#1A4A8C;line-height:1" id="med-sb-week">0</div>
+                <div style="font-size:9px;color:var(--text3);margin-top:2px">Diese Woche</div>
+              </div>
+              <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:6px;padding:5px 4px;text-align:center">
+                <div style="font-size:16px;font-weight:700;color:#D4A000;line-height:1" id="med-sb-eingereicht">0</div>
+                <div style="font-size:9px;color:var(--text3);margin-top:2px">Eingereicht</div>
+              </div>
+              <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:6px;padding:5px 4px;text-align:center">
+                <div style="font-size:16px;font-weight:700;color:#4A3A9A;line-height:1" id="med-sb-geplant">0</div>
+                <div style="font-size:9px;color:var(--text3);margin-top:2px">Geplant</div>
+              </div>
+            </div>
+            <!-- Woche Einträge -->
+            <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px;padding:0 2px" id="med-sb-week-lbl">Diese Woche</div>
+            <div id="med-sb-entries"></div>
+            <button onclick="setView('medien')" style="width:100%;margin-top:6px;padding:4px 8px;border-radius:6px;border:1px solid #1A4A8C;background:transparent;color:#1A4A8C;font-size:11px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px">
+              &#128240; Alle Platzierungen &#8594;
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div class="sb-section">
         <div class="sb-hdr" id="sb-hdr-overblick" onclick="toggleSB('sb-overblick')">
           <div class="sb-icon" style="background:#EDE9FB;color:#4A3A9A">&#9638;</div>
@@ -1056,7 +1092,7 @@ function hideSmartP(){document.getElementById('smart-prompt').classList.remove('
 
 // ── Main render ──
 function render(){
-  updateStats();renderPersonSB();renderTagStrip();renderTagSB();renderDonut();
+  updateStats();renderPersonSB();renderTagStrip();renderTagSB();renderDonut();renderMedienSidebar();
   if(!myName){document.getElementById('welcome-modal').classList.add('show');setTimeout(()=>document.getElementById('setup-inp').focus(),100);}
   const pb=document.getElementById('p-banner'),bt=document.getElementById('banner-txt');
   if(activePersonFilter){bt.textContent='Person: '+activePersonFilter;pb.classList.add('show');}else pb.classList.remove('show');
@@ -1368,7 +1404,53 @@ document.getElementById('text-inp').addEventListener('keydown',e=>{if(e.key==='E
 document.getElementById('text-inp').addEventListener('input',e=>{const ta=e.target;const val=ta.value;const pos=ta.selectionStart;const bc=val.slice(0,pos);if(bc.endsWith('//')){showDatePicker();return;}hideDatePicker();updateMentionDrop(val,pos);updateInpTip(val);});
 document.getElementById('setup-inp').addEventListener('keydown',e=>{if(e.key==='Enter')saveMyName();});
 
-// ── Drag & Drop ──
+// ── Medien Sidebar ──
+function renderMedienSidebar(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const weekStart=new Date(today);const dow=today.getDay()===0?6:today.getDay()-1;weekStart.setDate(today.getDate()-dow);
+  const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+13); // 2 weeks ahead
+  // Stats
+  const thisWeek=medienPlanung.filter(p=>{if(!p.datum)return false;const parts=p.datum.split('.');if(parts.length<3)return false;const d=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));return d>=weekStart&&d<=weekEnd;});
+  const eingereicht=medienPlanung.filter(p=>p.status==='eingereicht').length;
+  const geplant=medienPlanung.filter(p=>p.status==='geplant').length;
+  const cntEl=document.getElementById('med-sb-cnt');if(cntEl)cntEl.textContent=medienPlanung.length;
+  const wEl=document.getElementById('med-sb-week');if(wEl)wEl.textContent=thisWeek.length;
+  const eEl=document.getElementById('med-sb-eingereicht');if(eEl)eEl.textContent=eingereicht;
+  const gEl=document.getElementById('med-sb-geplant');if(gEl)gEl.textContent=geplant;
+  // Week label
+  const lbl=document.getElementById('med-sb-week-lbl');
+  if(lbl)lbl.textContent=`${weekStart.toLocaleDateString('de-AT',{day:'2-digit',month:'2-digit'})} – ${weekEnd.toLocaleDateString('de-AT',{day:'2-digit',month:'2-digit'})}`;
+  // Entries
+  const entriesEl=document.getElementById('med-sb-entries');if(!entriesEl)return;
+  // Also show upcoming DIWI/TV dates even if no planung entry
+  const upcomingFixed=[];
+  DIWI.filter(d=>{const parts=d.datum.split('.');const dt=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));return dt>=weekStart&&dt<=weekEnd;}).forEach(d=>{upcomingFixed.push({type:'diwi',label:`DIWI #${d.nr}`,sub:d.thema.slice(0,28)+(d.thema.length>28?'…':''),datum:d.datum,az:d.az,color:'#C08020',kanal:'diwi'});});
+  THEMA_VBG.filter(t=>{const parts=t.datum.split('.');const dt=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));return dt>=weekStart&&dt<=weekEnd;}).forEach(t=>{upcomingFixed.push({type:'tv',label:'Thema Vorarlberg',sub:t.thema.slice(0,28)+(t.thema.length>28?'…':''),datum:t.datum,color:'#D4537E',kanal:'thema_vbg'});});
+  // Planung entries this period
+  const planEntries=thisWeek.map(p=>{const k=KANALE.find(k=>k.id===p.kanal)||{color:'#888',name:p.kanal};return{type:'plan',label:k.name+(p.diwiNr?` #${p.diwiNr}`:''),sub:p.titel||p.tag||'',datum:p.datum,color:k.color,kanal:p.kanal,status:p.status};});
+  const allEntries=[...upcomingFixed,...planEntries].sort((a,b)=>{const da=a.datum.split('.').reverse().join('-');const db=b.datum.split('.').reverse().join('-');return da.localeCompare(db);});
+  if(!allEntries.length){entriesEl.innerHTML=`<div style="font-size:11px;color:var(--text3);text-align:center;padding:8px 4px;font-style:italic">Keine Einträge diese Woche</div>`;return;}
+  entriesEl.innerHTML=allEntries.slice(0,5).map(e=>{
+    const today2=new Date();today2.setHours(0,0,0,0);
+    let azBadge='';
+    if(e.az){const azParts=e.az.split('.');const azD=new Date(parseInt('20'+azParts[2]),parseInt(azParts[1])-1,parseInt(azParts[0]));const diff=Math.round((azD-today2)/86400000);if(diff<0)azBadge=`<span style="font-size:9px;font-weight:600;padding:1px 5px;border-radius:4px;background:#FDEAEA;color:#A03040;white-space:nowrap">AZ überfällig</span>`;else if(diff<=3)azBadge=`<span style="font-size:9px;font-weight:600;padding:1px 5px;border-radius:4px;background:#FDEAEA;color:#A03040;white-space:nowrap">AZ ${e.az}</span>`;else if(diff<=7)azBadge=`<span style="font-size:9px;font-weight:600;padding:1px 5px;border-radius:4px;background:#FFF8DC;color:#8A5A00;white-space:nowrap">AZ ${e.az}</span>`;}
+    const statusBadge=e.status?`<span style="font-size:9px;font-weight:600;padding:1px 5px;border-radius:4px;white-space:nowrap;background:${e.status==='erschienen'?'#DDF6F2':e.status==='eingereicht'?'#FFF8DC':'#EDE9FB'};color:${e.status==='erschienen'?'#1A6B62':e.status==='eingereicht'?'#8A5A00':'#4A3A9A'}">${e.status}</span>`:'';
+    return`<div onclick="openMedienKanal('${e.kanal}')" style="display:flex;align-items:flex-start;gap:6px;padding:5px 4px;border-radius:6px;margin-bottom:3px;background:var(--surface);border:0.5px solid var(--border);cursor:pointer;transition:background .1s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='var(--surface)'">
+      <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;background:${e.color}"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;font-weight:500;color:var(--text);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.label)}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:1px">${esc(e.datum)}${e.sub?' · '+esc(e.sub):''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2px;align-items:flex-end">${azBadge}${statusBadge}</div>
+    </div>`;
+  }).join('');
+}
+
+function openMedienKanal(kanalId){
+  medKanalFilter=kanalId;
+  setView('medien');
+  renderMedien();
+}
 let dragSrcId=null;
 function onDragStart(e,id){dragSrcId=id;e.dataTransfer.effectAllowed='move';setTimeout(()=>{const el=document.querySelector(`[data-id="${id}"]`);if(el)el.classList.add('dragging');},0);}
 function onDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';const el=e.currentTarget;el.classList.add('drag-over-top');}
@@ -1461,6 +1543,7 @@ window.calMv=calMv;window.calToday=calToday;window.calSelDay=calSelDay;window.ch
 window.smartPerson=smartPerson;window.smartSkip=smartSkip;window.sAC=sAC;
 window.toggleEditTag=toggleEditTag;window.insertEditMention=insertEditMention;window.insertEditHash=insertEditHash;
 window.onDragStart=onDragStart;window.onDragOver=onDragOver;window.onDragLeave=onDragLeave;window.onDrop=onDrop;
+window.openMedienKanal=openMedienKanal;window.renderMedienSidebar=renderMedienSidebar;
 window.toggleHdrDD=toggleHdrDD;window.closeHdrDD=closeHdrDD;window.scrollToSB=scrollToSB;
 window.toggleDatenschutz=toggleDatenschutz;
 
@@ -1468,7 +1551,7 @@ window.toggleDatenschutz=toggleDatenschutz;
 function migrate(){const l=localStorage.getItem('dashboard_v6')||localStorage.getItem('dashboard_v7');if(l){try{const li=JSON.parse(l);if(li.length>0&&items.length===0){items=li;save();}}catch(e){}}}
 onValue(teamRef,snap=>{const data=snap.val();if(data&&data.names){window._teamList=[...new Set([...DEFAULT_TEAM,...data.names])];if(data.colors)window._teamColors={...COLOR_OV,...data.colors};Object.keys(cCache).forEach(k=>{delete cCache[k];});renderPersonSB();}});
 onValue(tagsRef,snap=>{const data=snap.val();if(data&&Array.isArray(data)){customTags=data;renderTagStrip();renderTagSB();updateMedTagFilter();}});
-onValue(medienRef,snap=>{const data=snap.val();medienPlanung=data?(Array.isArray(data)?data:Object.values(data)):[];if(currentView==='medien')renderMedien();});
+onValue(medienRef,snap=>{const data=snap.val();medienPlanung=data?(Array.isArray(data)?data:Object.values(data)):[];renderMedienSidebar();if(currentView==='medien')renderMedien();});
 onValue(itemsRef,snap=>{const data=snap.val();items=data?(Array.isArray(data)?data:Object.values(data)):[];if(!_fbReady){_fbReady=true;migrate();let ch=false;items.forEach(it=>{if(it.person&&['jennifer','jennifer grabher'].includes(it.person.trim().toLowerCase())){it.person='Jennifer Grabher';ch=true;}});if(ch)save();}setSS('ok');render();});
 onValue(myNameRef,snap=>{const v=snap.val();if(v&&!myName){myName=v;localStorage.setItem(STORE_ME,myName);}});
 
