@@ -675,12 +675,6 @@ table.mt tbody tr:hover td{background:var(--surface2)}
       <div class="medien-wrap" id="medien-wrap">
         <div style="display:flex;align-items:center;gap:.625rem;flex-wrap:wrap">
           <span style="font-size:13px;font-weight:600">&#128240; Medien-Board</span>
-          <div class="medien-filter-bar" id="med-fbar">
-            <button class="f-btn active" data-mf="alle" style="font-size:10px;padding:2px 8px">Alle</button>
-            <button class="f-btn" data-mf="geplant" style="font-size:10px;padding:2px 8px">Geplant</button>
-            <button class="f-btn" data-mf="eingereicht" style="font-size:10px;padding:2px 8px">Eingereicht</button>
-            <button class="f-btn" data-mf="erschienen" style="font-size:10px;padding:2px 8px">Erschienen</button>
-          </div>
           <div style="margin-left:auto;display:flex;gap:.375rem;align-items:center">
             <select id="med-tag-filter" style="font-size:11px;padding:3px 7px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text2);cursor:pointer" onchange="renderMedien()">
               <option value="">Alle Themen</option>
@@ -692,8 +686,16 @@ table.mt tbody tr:hover td{background:var(--surface2)}
           </div>
         </div>
 
-        <!-- Kanal-Kacheln -->
-        <div class="kanal-grid" id="kanal-grid"></div>
+        <!-- Medien Board top: upcoming left, kanäle right -->
+        <div style="display:grid;grid-template-columns:220px 1fr;gap:.875rem;align-items:start">
+          <!-- Nächste 2 Wochen -->
+          <div>
+            <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:.5rem" id="med-upcoming-lbl">Nächste 2 Wochen</div>
+            <div id="med-upcoming-list" style="display:flex;flex-direction:column;gap:4px"></div>
+          </div>
+          <!-- Kanal-Kacheln -->
+          <div class="kanal-grid" id="kanal-grid"></div>
+        </div>
 
         <!-- Platzierungen Tabelle -->
         <div class="medien-table-wrap">
@@ -703,7 +705,7 @@ table.mt tbody tr:hover td{background:var(--surface2)}
           </div>
           <div style="overflow-x:auto">
             <table class="mt">
-              <thead><tr><th>Kanal</th><th>Datum / Ausgabe</th><th>Titel</th><th>Thema</th><th>Person</th><th>Status</th><th>AZ-Schluss</th><th></th></tr></thead>
+              <thead><tr><th>Kanal</th><th>Datum / Ausgabe</th><th>Titel</th><th>Thema</th><th>Person</th><th>AZ-Schluss</th><th></th></tr></thead>
               <tbody id="med-tbody"></tbody>
             </table>
             <div id="med-empty" class="empty-st" style="display:none">Noch keine Platzierungen &#8212; klicke &#8222;+ Platzierung erfassen&#8220;</div>
@@ -716,12 +718,13 @@ table.mt tbody tr:hover td{background:var(--surface2)}
           <div class="auswertung-grid" id="ausw-grid"></div>
         </div>
 
-        <!-- DIWI Terminkalender -->
+        <!-- DIWI Terminkalender — eingeklappt -->
         <div class="medien-table-wrap">
-          <div class="medien-table-hdr">
+          <div class="medien-table-hdr" onclick="toggleMedTable('diwi-table-body','diwi-table-chev')" style="cursor:pointer">
             <span class="medien-table-title">DIWI &#8212; Ausgaben 2026</span>
+            <span id="diwi-table-chev" style="font-size:11px;color:var(--text3)">&#9662;</span>
           </div>
-          <div style="overflow-x:auto">
+          <div id="diwi-table-body" style="display:none;overflow-x:auto">
             <table class="mt">
               <thead><tr><th>Nr.</th><th>Erscheinen</th><th>Sonderthema</th><th>AZ-Schluss</th><th></th></tr></thead>
               <tbody id="diwi-tbody"></tbody>
@@ -729,12 +732,13 @@ table.mt tbody tr:hover td{background:var(--surface2)}
           </div>
         </div>
 
-        <!-- Thema Vorarlberg -->
+        <!-- Thema Vorarlberg — eingeklappt -->
         <div class="medien-table-wrap">
-          <div class="medien-table-hdr">
+          <div class="medien-table-hdr" onclick="toggleMedTable('tv-table-body','tv-table-chev')" style="cursor:pointer">
             <span class="medien-table-title">Thema Vorarlberg &#8212; Ausgaben 2026</span>
+            <span id="tv-table-chev" style="font-size:11px;color:var(--text3)">&#9662;</span>
           </div>
-          <div style="overflow-x:auto">
+          <div id="tv-table-body" style="display:none;overflow-x:auto">
             <table class="mt">
               <thead><tr><th>Erscheinen</th><th>Schwerpunktthema</th><th></th></tr></thead>
               <tbody id="tv-tbody"></tbody>
@@ -1132,7 +1136,41 @@ function render(){
 }
 
 // ── Medien Board ──
+function renderMedUpcoming(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const weekEnd=new Date(today);weekEnd.setDate(today.getDate()+14);
+  const lbl=document.getElementById('med-upcoming-lbl');
+  if(lbl)lbl.textContent=`${today.toLocaleDateString('de-AT',{day:'2-digit',month:'2-digit'})} – ${weekEnd.toLocaleDateString('de-AT',{day:'2-digit',month:'2-digit'})}`;
+  const el=document.getElementById('med-upcoming-list');if(!el)return;
+  // Collect planned items from medienPlanung
+  const planned=medienPlanung.filter(p=>{
+    if(!p.datum)return false;
+    const parts=p.datum.split('.');if(parts.length<3)return false;
+    const d=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));
+    return d>=today&&d<=weekEnd;
+  });
+  // Also add fixed DIWI/TV dates even without planung
+  const fixed=[];
+  DIWI.filter(d=>{const parts=d.datum.split('.');const dt=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));return dt>=today&&dt<=weekEnd;}).forEach(d=>{if(!medienPlanung.some(p=>p.kanal==='diwi'&&p.diwiNr===d.nr))fixed.push({kanal:'diwi',datum:d.datum,label:`DIWI #${d.nr}`,sub:d.thema.slice(0,30)+(d.thema.length>30?'…':''),az:d.az,color:'#C08020'});});
+  THEMA_VBG.filter(t=>{const parts=t.datum.split('.');const dt=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));return dt>=today&&dt<=weekEnd;}).forEach(t=>{fixed.push({kanal:'thema_vbg',datum:t.datum,label:'Thema Vorarlberg',sub:t.thema.slice(0,30)+(t.thema.length>30?'…':''),color:'#D4537E'});});
+  const allItems=[...planned.map(p=>{const k=KANALE.find(k=>k.id===p.kanal)||{color:'#888',name:p.kanal};return{kanal:p.kanal,datum:p.datum,label:k.name+(p.diwiNr?` #${p.diwiNr}`:''),sub:p.titel||p.tag||'',color:k.color,az:p.kanal==='diwi'&&p.diwiNr?(DIWI.find(d=>d.nr===p.diwiNr)||{}).az:''};}), ...fixed].sort((a,b)=>{const da=a.datum.split('.').reverse().join('-');const db=b.datum.split('.').reverse().join('-');return da.localeCompare(db);});
+  if(!allItems.length){el.innerHTML=`<div style="font-size:11px;color:var(--text3);font-style:italic;padding:4px 2px">Keine geplanten Einträge</div>`;return;}
+  el.innerHTML=allItems.map(e=>{
+    let azBadge='';
+    if(e.az){const azP=e.az.split('.');const azD=new Date(parseInt('20'+azP[2]),parseInt(azP[1])-1,parseInt(azP[0]));const diff=Math.round((azD-today)/86400000);if(diff<0)azBadge=`<span style="font-size:9px;background:#FDEAEA;color:#A03040;padding:1px 4px;border-radius:3px;white-space:nowrap">AZ vorbei</span>`;else if(diff<=3)azBadge=`<span style="font-size:9px;background:#FDEAEA;color:#A03040;padding:1px 4px;border-radius:3px;white-space:nowrap">AZ ${e.az}</span>`;else if(diff<=7)azBadge=`<span style="font-size:9px;background:#FFF8DC;color:#8A5A00;padding:1px 4px;border-radius:3px;white-space:nowrap">AZ ${e.az}</span>`;}
+    return`<div onclick="toggleMedKanal('${e.kanal}')" style="display:flex;align-items:flex-start;gap:6px;padding:5px 7px;border-radius:6px;background:var(--surface);border:1px solid var(--border);cursor:pointer;transition:background .1s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='var(--surface)'">
+      <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;background:${e.color}"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.label)}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:1px">${esc(e.datum)}${e.sub?' · '+esc(e.sub):''}</div>
+      </div>
+      ${azBadge}
+    </div>`;
+  }).join('');
+}
+// ── Medien Board render ──
 function renderMedien(){
+  renderMedUpcoming();
   // Kanal-Kacheln
   const tagF=document.getElementById('med-tag-filter').value;
   const yearF=parseInt(document.getElementById('med-year-filter').value)||2026;
@@ -1142,13 +1180,12 @@ function renderMedien(){
     const active=medKanalFilter===k.id;
     return`<div class="kanal-card${active?' active':''}" style="border-left-color:${k.color}" onclick="toggleMedKanal('${k.id}')">
       <div class="kanal-dot" style="background:${k.color}"></div>
-      <div><div class="kanal-name">${esc(k.name)}</div><div class="kanal-info">${esc(k.info)}</div><div class="kanal-cnt" style="color:${k.color}">${cnt} Platzierung${cnt!==1?'en':''}</div></div>
+      <div><div class="kanal-name">${esc(k.name)}</div><div class="kanal-info">${esc(k.info)}</div></div>
     </div>`;
   }).join('');
 
   // Platzierungen Tabelle
   let list=medienPlanung;
-  if(medFilter!=='alle')list=list.filter(p=>p.status===medFilter);
   if(medKanalFilter)list=list.filter(p=>p.kanal===medKanalFilter);
   if(tagF)list=list.filter(p=>p.tag===tagF);
   list=[...list].sort((a,b)=>a.datum.localeCompare(b.datum));
@@ -1156,9 +1193,7 @@ function renderMedien(){
   const empty=document.getElementById('med-empty');
   if(!list.length){tbody.innerHTML='';empty.style.display='block';}
   else{empty.style.display='none';tbody.innerHTML=list.map((p,i)=>{
-    const k=KANALE.find(k=>k.id===p.kanal)||{name:p.kanal,color:'#888'};
-    const statusMap={geplant:'med-s-geplant',eingereicht:'med-s-eingereicht',erschienen:'med-s-erschienen'};
-    const statusLbl={geplant:'Geplant',eingereicht:'Eingereicht',erschienen:'Erschienen'};
+    const k=KANALE.find(kk=>kk.id===p.kanal)||{name:p.kanal,color:'#888'};
     let datumLabel=p.datum;
     let azLabel='';
     if(p.kanal==='diwi'&&p.diwiNr){const d=DIWI.find(d=>d.nr===p.diwiNr);if(d){datumLabel=`<span class="diwi-tooltip" data-tip="${esc(d.thema)} · ${esc(d.datum)}">DIWI #${d.nr}${d.ga?'<span class="med-ga">★</span>':''}</span>`;azLabel=`<span class="med-az">${esc(d.az)}</span>`;}}
@@ -1171,7 +1206,6 @@ function renderMedien(){
       <td style="font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.titel||'')}</td>
       <td>${p.tag?`<span class="i-ttag" style="background:${tagC.bg};color:${tagC.tx}">#${esc(p.tag)}</span>`:''}</td>
       <td>${pc?`<span class="ptag" style="background:${pc.bg};color:${pc.tx}"><span class="ptag-av" style="background:${pc.av};color:#fff">${esc(ini(person))}</span>${esc(person)}</span>`:'<span style="color:var(--text3);font-size:11px">—</span>'}</td>
-      <td><span class="med-status ${statusMap[p.status]||'med-s-geplant'}">${statusLbl[p.status]||p.status}</span></td>
       <td>${azLabel}</td>
       <td><button class="del-btn" onclick="delMed(${medienPlanung.indexOf(p)})" title="Löschen">×</button></td>
     </tr>`;
@@ -1302,7 +1336,7 @@ function confirmMedM(){
   closeMedM();renderMedien();
 }
 document.getElementById('medm-modal').addEventListener('click',e=>{if(e.target===document.getElementById('medm-modal'))closeMedM();});
-document.getElementById('med-fbar').addEventListener('click',e=>{const btn=e.target.closest('[data-mf]');if(!btn)return;medFilter=btn.dataset.mf;document.querySelectorAll('#med-fbar .f-btn').forEach(b=>b.classList.toggle('active',b.dataset.mf===medFilter));renderMedien();});
+// med-fbar removed (status filter no longer needed)
 
 // ── Autocomplete ──
 function bAC(inp,acEl){const v=inp.value.trim().toLowerCase();if(!v){acEl.style.display='none';return;}const s=window._teamList.filter(t=>t.toLowerCase().startsWith(v)||t.toLowerCase().split(' ').some(p=>p.startsWith(v))).slice(0,6);if(!s.length){acEl.style.display='none';return;}acEl.innerHTML=s.map(n=>{const c=pCol(n);return`<div class="ac-item" onmousedown="sAC('${esc(n)}','${inp.id}','${acEl.id}')"><div class="ac-av" style="background:${c.av};color:#fff">${esc(ini(n))}</div>${esc(n)}</div>`;}).join('');acEl.style.display='block';}
@@ -1386,6 +1420,12 @@ function setView(v){
   document.getElementById('list-wrap').style.display=v==='list'?'':'none';
   document.getElementById('cal-wrap').classList.toggle('show',v==='cal');
   document.getElementById('medien-wrap').classList.toggle('show',v==='medien');
+  // Hide overblick/chart/tags/team sidebar sections when in medien view
+  ['sb-overblick','sb-chart','sb-tags','sb-team'].forEach(id=>{
+    const hdr=document.getElementById('sb-hdr-'+id.replace('sb-',''));
+    const sec=hdr?hdr.closest('.sb-section'):null;
+    if(sec)sec.style.display=v==='medien'?'none':'';
+  });
   if(v==='cal')renderCal();
   if(v==='medien'){updateMedTagFilter();renderMedien();}
 }
@@ -1543,7 +1583,9 @@ window.calMv=calMv;window.calToday=calToday;window.calSelDay=calSelDay;window.ch
 window.smartPerson=smartPerson;window.smartSkip=smartSkip;window.sAC=sAC;
 window.toggleEditTag=toggleEditTag;window.insertEditMention=insertEditMention;window.insertEditHash=insertEditHash;
 window.onDragStart=onDragStart;window.onDragOver=onDragOver;window.onDragLeave=onDragLeave;window.onDrop=onDrop;
+function toggleMedTable(bodyId,chevId){const b=document.getElementById(bodyId);const c=document.getElementById(chevId);if(!b)return;const open=b.style.display==='none';b.style.display=open?'block':'none';if(c)c.style.transform=open?'rotate(180deg)':'';}
 window.openMedienKanal=openMedienKanal;window.renderMedienSidebar=renderMedienSidebar;
+window.toggleMedTable=toggleMedTable;
 window.toggleHdrDD=toggleHdrDD;window.closeHdrDD=closeHdrDD;window.scrollToSB=scrollToSB;
 window.toggleDatenschutz=toggleDatenschutz;
 
