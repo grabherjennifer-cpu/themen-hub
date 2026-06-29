@@ -359,6 +359,9 @@ table.mt tbody tr:hover td{background:var(--surface2)}
 
 /* Mobile */
 @media(max-width:768px){
+  .mob-section#mob-dash .sb-section{display:none !important}
+}
+@media(max-width:768px){
   .page{grid-template-columns:1fr;padding:.75rem;gap:.75rem}
   .left-col{position:static;max-height:none}
   .right-col{display:none}
@@ -383,6 +386,18 @@ table.mt tbody tr:hover td{background:var(--surface2)}
   .mob-nav{display:none}
   .mob-section{display:contents}
 }
+/* Drag & drop */
+.item.dragging{opacity:.4;border:2px dashed var(--accent)!important}
+.item.drag-over-top{border-top:2.5px solid var(--accent)!important}
+.drag-handle{cursor:grab;color:var(--text3);font-size:13px;padding:0 2px;flex-shrink:0;user-select:none;align-self:center;opacity:.4;transition:opacity .15s}
+.item:hover .drag-handle{opacity:1}
+.drag-handle:active{cursor:grabbing}
+
+/* Tag picker in edit */
+.edit-tag-strip{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:5px}
+.edit-tag-btn{font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;cursor:pointer;border:1.5px solid transparent;transition:all .15s}
+.edit-tag-btn:hover{opacity:.85}
+.edit-tag-btn.active{border-color:rgba(0,0,0,.25)!important}
 </style>
 </head>
 <body>
@@ -524,9 +539,9 @@ table.mt tbody tr:hover td{background:var(--surface2)}
         <div class="sb-hdr" id="sb-hdr-overblick" onclick="toggleSB('sb-overblick')">
           <div class="sb-icon" style="background:#EDE9FB;color:#4A3A9A">&#9638;</div>
           <span class="sb-label">&#220;berblick</span>
-          <span class="sb-chev" id="chev-sb-overblick">&#9662;</span>
+          <span class="sb-chev open" id="chev-sb-overblick">&#9662;</span>
         </div>
-        <div class="sb-body" id="sb-overblick">
+        <div class="sb-body open" id="sb-overblick">
           <div class="sb-inner">
             <div class="stats-grid">
               <div class="stat-box" data-t="mine" onclick="setFilter('mine')"><div class="stat-n" id="s-mine">0</div><div class="stat-l">Meine To-dos</div></div>
@@ -998,7 +1013,7 @@ function addItem(){
 function handleRecurComplete(item){if(!item.recur||!item.done)return;const intervals={daily:1,weekly:7,monthly:30};const days=intervals[item.recur]||7;const newDl=new Date();newDl.setHours(0,0,0,0);newDl.setDate(newDl.getDate()+days);const newItem={...item,id:Date.now().toString(),done:false,ts:Date.now(),deadline:newDl.toISOString()};delete newItem.doneAt;items.unshift(newItem);save();}
 function toggle(id){const it=items.find(i=>i.id===id);if(it){it.done=!it.done;if(it.done){it.doneAt=Date.now();if(it.recur)handleRecurComplete(it);}else delete it.doneAt;save();render();}}
 function del(id){if(editingId===id)editingId=null;items=items.filter(i=>i.id!==id);save();render();}
-function startEdit(id){editingId=id;render();setTimeout(()=>{const ta=document.getElementById('edit-'+id);if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}},50);}
+function startEdit(id){editingId=id;render();setTimeout(()=>{const ta=document.getElementById('edit-'+id);if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);setupEditTA(id);}},50);}
 function saveEdit(id){const ta=document.getElementById('edit-'+id);if(!ta)return;const it=items.find(i=>i.id===id);if(it)it.text=ta.value.trim()||it.text;editingId=null;save();render();}
 function cancelEdit(){editingId=null;render();}
 function ideaToTask(id){const it=items.find(i=>i.id===id);if(!it)return;it.types=it.types.filter(t=>t!=='idea');if(!it.types.length)it.types=['todo'];else if(!it.types.includes('todo'))it.types.unshift('todo');save();render();}
@@ -1072,9 +1087,11 @@ function render(){
     const ideaBtn=isIdea&&!item.done?`<button class="action-btn idea-to-task" onclick="ideaToTask('${item.id}')">→ Als Task</button>`:'';
     const badges=(item.types||[item.type]).map(t=>`<span class="badge badge-${t}" onclick="openTM('${item.id}')">${{todo:'To-do',handoff:'Übergabe',watch:'Beobachten',idea:'💡 Idee'}[t]||t}</span>`).join('');
     const isEd=editingId===item.id;
-    const txtP=isEd?`<textarea class="edit-area" id="edit-${item.id}" rows="2">${esc(item.text)}</textarea><div class="edit-btns"><button class="sv-btn" onclick="saveEdit('${item.id}')">Speichern</button><button onclick="cancelEdit()">Abbrechen</button></div>`:`<div class="item-text" onclick="startEdit('${item.id}')">${esc(item.text)}</div>`;
+    // Tag picker for edit mode
+    const tagPicker=isEd?`<div class="edit-tag-strip">${getAllTags().map(t=>{const tc=tCol(t);const active=(item.tags||[]).includes(t);return`<span class="edit-tag-btn${active?' active':''}" style="background:${tc.bg};color:${tc.tx}${active?';border-color:'+tc.tx:''}" onclick="toggleEditTag('${item.id}','${esc(t)}')">#${esc(t)}</span>`;}).join('')}</div>`:'';
+    const txtP=isEd?`${tagPicker}<textarea class="edit-area" id="edit-${item.id}" rows="2">${esc(item.text)}</textarea><div class="edit-btns"><button class="sv-btn" onclick="saveEdit('${item.id}')">Speichern</button><button onclick="cancelEdit()">Abbrechen</button></div>`:`<div class="item-text" onclick="startEdit('${item.id}')">${esc(item.text)}</div>`;
     const cls=['item',item.done?'done':'',isMine&&!hasType(item,'handoff')?'mine':'',isIdea?'idea-item':'',isEd?'editing':''].filter(Boolean).join(' ');
-    return`<div class="${cls}"><button class="chk${item.done?' on':''}" onclick="toggle('${item.id}')"></button><div class="item-body"><div class="item-top">${badges}${recurBadge}${mediaBadge}${pH}${persH}${tagH}${dlWrap}${hoBtn}${undoBtn}${ideaBtn}</div>${txtP}<div class="item-meta">${fmt(item.ts)}</div></div><button class="del-btn" onclick="del('${item.id}')">×</button></div>`;
+    return`<div class="${cls}" draggable="true" data-id="${item.id}" ondragstart="onDragStart(event,'${item.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${item.id}')"><span class="drag-handle" title="Ziehen zum Sortieren">⠿</span><button class="chk${item.done?' on':''}" onclick="toggle('${item.id}')"></button><div class="item-body"><div class="item-top">${badges}${recurBadge}${mediaBadge}${pH}${persH}${tagH}${dlWrap}${hoBtn}${undoBtn}${ideaBtn}</div>${txtP}<div class="item-meta">${fmt(item.ts)}</div></div><button class="del-btn" onclick="del('${item.id}')">×</button></div>`;
   }).join('');
 }
 
@@ -1274,7 +1291,15 @@ function switchToNewPerson(){pmCreatingNew=true;document.getElementById('pm-new-
 function openPM(id,isP,idx){pmId=id;pmIsP=isP;pmIdx=idx;pmCreatingNew=false;const it=items.find(i=>i.id===id);if(!it)return;const cur=isP?(it.persons||[])[idx]||'':it.person||'';document.getElementById('pm-inp').value=cur;document.getElementById('pm-inp').style.display='';document.getElementById('pm-new-wrap').style.display='none';document.getElementById('pm-new-inp').value='';document.getElementById('pm-ac').style.display='none';document.getElementById('pm-modal').classList.add('show');setTimeout(()=>document.getElementById('pm-inp').focus(),50);}
 function closePM(){document.getElementById('pm-modal').classList.remove('show');pmId=null;pmCreatingNew=false;}
 function confirmPM(){if(!pmId)return;let person='';if(pmCreatingNew){const nn=document.getElementById('pm-new-inp').value.trim();if(nn&&!window._teamList.includes(nn)){const ci=getNextFreeColor();window._teamList.push(nn);if(!window._teamColors)window._teamColors={};window._teamColors[nn]=ci;delete cCache[nn];saveTeam();}person=nn;}else{const raw=document.getElementById('pm-inp').value.trim();person=raw?rPN(raw):'';}const it=items.find(i=>i.id===pmId);if(it){if(pmIsP){if(!it.persons)it.persons=[];if(pmIdx>=0)it.persons[pmIdx]=person;else it.persons.push(person);it.persons=it.persons.filter(Boolean);}else it.person=person;}save();render();closePM();}
-function clearPM(){const it=items.find(i=>i.id===pmId);if(it){if(pmIsP){if(it.persons&&pmIdx>=0)it.persons.splice(pmIdx,1);}else it.person='';}save();render();closePM();}
+function clearPM(){
+  const it=items.find(i=>i.id===pmId);
+  if(it){
+    if(pmIsP){if(it.persons&&pmIdx>=0){it.persons.splice(pmIdx,1);it.persons=it.persons.filter(Boolean);}}
+    else{it.person='';}
+    save();render();
+  }
+  closePM();
+}
 document.getElementById('pm-inp').addEventListener('input',()=>bAC(document.getElementById('pm-inp'),document.getElementById('pm-ac')));
 document.getElementById('pm-inp').addEventListener('blur',()=>setTimeout(()=>{document.getElementById('pm-ac').style.display='none';},150));
 document.getElementById('pm-inp').addEventListener('keydown',e=>{if(e.key==='Enter')confirmPM();if(e.key==='Escape')closePM();});
@@ -1337,6 +1362,80 @@ document.getElementById('text-inp').addEventListener('keydown',e=>{if(e.key==='E
 document.getElementById('text-inp').addEventListener('input',e=>{const ta=e.target;const val=ta.value;const pos=ta.selectionStart;const bc=val.slice(0,pos);if(bc.endsWith('//')){showDatePicker();return;}hideDatePicker();updateMentionDrop(val,pos);updateInpTip(val);});
 document.getElementById('setup-inp').addEventListener('keydown',e=>{if(e.key==='Enter')saveMyName();});
 
+// ── Drag & Drop ──
+let dragSrcId=null;
+function onDragStart(e,id){dragSrcId=id;e.dataTransfer.effectAllowed='move';setTimeout(()=>{const el=document.querySelector(`[data-id="${id}"]`);if(el)el.classList.add('dragging');},0);}
+function onDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';const el=e.currentTarget;el.classList.add('drag-over-top');}
+function onDragLeave(e){e.currentTarget.classList.remove('drag-over-top');}
+function onDrop(e,targetId){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over-top');
+  document.querySelectorAll('.item').forEach(el=>{el.classList.remove('dragging','drag-over-top');});
+  if(!dragSrcId||dragSrcId===targetId)return;
+  const srcIdx=items.findIndex(i=>i.id===dragSrcId);
+  const tgtIdx=items.findIndex(i=>i.id===targetId);
+  if(srcIdx<0||tgtIdx<0)return;
+  const [moved]=items.splice(srcIdx,1);
+  items.splice(tgtIdx,0,moved);
+  save();render();dragSrcId=null;
+}
+
+// ── Toggle tag in edit mode ──
+function toggleEditTag(id,tag){
+  const it=items.find(i=>i.id===id);if(!it)return;
+  if(!it.tags)it.tags=[];
+  if(it.tags.includes(tag))it.tags=it.tags.filter(t=>t!==tag);
+  else it.tags.push(tag);
+  save();
+  // Re-render just the tag strip in edit mode without losing focus
+  const strip=document.querySelector(`[data-id="${id}"] .edit-tag-strip`);
+  if(strip){strip.innerHTML=getAllTags().map(t=>{const tc=tCol(t);const active=(it.tags||[]).includes(t);return`<span class="edit-tag-btn${active?' active':''}" style="background:${tc.bg};color:${tc.tx}${active?';border-color:'+tc.tx:''}" onclick="toggleEditTag('${id}','${esc(t)}')">#${esc(t)}</span>`;}).join('');}
+}
+
+// ── @ mention + # tag support in edit textarea ──
+let editMentionAnchor=-1;
+function setupEditTA(id){
+  const ta=document.getElementById('edit-'+id);if(!ta)return;
+  ta.addEventListener('input',()=>{
+    const val=ta.value;const pos=ta.selectionStart;const bc=val.slice(0,pos);
+    const atM=bc.match(/@([A-Za-zÄÖÜäöüß]*)$/);
+    const hashM=bc.match(/#([A-Za-zÄÖÜäöüß0-9]*)$/);
+    // Remove old inline hints
+    let hint=ta.parentNode.querySelector('.edit-inline-drop');
+    if(!hint){hint=document.createElement('div');hint.className='edit-inline-drop ac-list';hint.style.cssText='position:relative;z-index:60;margin-bottom:3px';ta.parentNode.insertBefore(hint,ta);}
+    if(atM){
+      editMentionAnchor=bc.lastIndexOf('@');
+      const frag=atM[1].toLowerCase();
+      const sugg=window._teamList.filter(t=>!frag||t.toLowerCase().split(' ').some(p=>p.startsWith(frag))||t.toLowerCase().startsWith(frag)).slice(0,5);
+      if(sugg.length){hint.innerHTML=sugg.map(n=>{const c=pCol(n);return`<div class="ac-item" onmousedown="insertEditMention('${id}','${esc(n)}')"><div class="ac-av" style="background:${c.av};color:#fff">${esc(ini(n))}</div>${esc(n)}</div>`;}).join('');hint.style.display='block';return;}
+    } else if(hashM){
+      const frag=hashM[1].toUpperCase();
+      const sugg=getAllTags().filter(t=>!frag||t.startsWith(frag)).slice(0,6);
+      if(sugg.length){hint.innerHTML=sugg.map(t=>{const tc=tCol(t);return`<div class="ac-item" onmousedown="insertEditHash('${id}','${esc(t)}')"><span style="font-size:10px;font-weight:700;padding:1px 5px;border-radius:5px;background:${tc.bg};color:${tc.tx}">#${esc(t)}</span></div>`;}).join('');hint.style.display='block';return;}
+    }
+    hint.style.display='none';
+  });
+  ta.addEventListener('blur',()=>{setTimeout(()=>{const hint=ta.parentNode.querySelector('.edit-inline-drop');if(hint)hint.style.display='none';},150);});
+}
+function insertEditMention(id,name){
+  const ta=document.getElementById('edit-'+id);if(!ta)return;
+  const val=ta.value;const before=val.slice(0,editMentionAnchor);const after=val.slice(ta.selectionEnd||editMentionAnchor);
+  ta.value=before+'@'+name.split(' ')[0]+' '+after.replace(/^[A-Za-zÄÖÜäöüß]*/,'');
+  const hint=ta.parentNode.querySelector('.edit-inline-drop');if(hint)hint.style.display='none';
+  ta.focus();
+}
+function insertEditHash(id,tag){
+  const ta=document.getElementById('edit-'+id);if(!ta)return;
+  const val=ta.value;const pos=ta.selectionStart;const bc=val.slice(0,pos);
+  const hashStart=bc.lastIndexOf('#');
+  const before=val.slice(0,hashStart);const after=val.slice(pos);
+  ta.value=before+'#'+tag+' '+after;
+  const hint=ta.parentNode.querySelector('.edit-inline-drop');if(hint)hint.style.display='none';
+  // Also add to tags
+  const it=items.find(i=>i.id===id);if(it){if(!it.tags)it.tags=[];if(!it.tags.includes(tag))it.tags.push(tag);}
+  ta.focus();
+}
+
 // ── Expose to window ──
 window.saveMyName=saveMyName;window.toggle=toggle;window.del=del;window.startEdit=startEdit;window.saveEdit=saveEdit;window.cancelEdit=cancelEdit;
 window.setFilter=setFilter;window.setTagFilter=setTagFilter;window.setView=setView;window.mobNav=mobNav;
@@ -1354,6 +1453,8 @@ window.openMedM=openMedM;window.openMedMDiwi=openMedMDiwi;window.openMedMTV=open
 window.toggleMedKanal=toggleMedKanal;window.delMed=delMed;window.renderMedien=renderMedien;
 window.calMv=calMv;window.calToday=calToday;window.calSelDay=calSelDay;window.chartMv=chartMv;window.runAI=runAI;
 window.smartPerson=smartPerson;window.smartSkip=smartSkip;window.sAC=sAC;
+window.toggleEditTag=toggleEditTag;window.insertEditMention=insertEditMention;window.insertEditHash=insertEditHash;
+window.onDragStart=onDragStart;window.onDragOver=onDragOver;window.onDragLeave=onDragLeave;window.onDrop=onDrop;
 window.toggleHdrDD=toggleHdrDD;window.closeHdrDD=closeHdrDD;window.scrollToSB=scrollToSB;
 window.toggleDatenschutz=toggleDatenschutz;
 
