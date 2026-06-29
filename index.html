@@ -395,8 +395,8 @@ table.mt tbody tr:hover td{background:var(--surface2)}
 
 /* Tag picker in edit */
 .edit-tag-strip{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:5px}
-.edit-tag-btn{font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;cursor:pointer;border:1.5px solid transparent;transition:all .15s}
-.edit-tag-btn:hover{opacity:.85}
+.edit-tag-btn{font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;background:var(--surface2);color:var(--text3)}
+.edit-tag-btn:hover{background:var(--surface2);color:var(--text2);border-color:var(--border)}
 .edit-tag-btn.active{border-color:rgba(0,0,0,.25)!important}
 </style>
 </head>
@@ -912,9 +912,9 @@ function pCol(n){if(cCache[n])return cCache[n];const tc=window._teamColors;if(tc
 
 const TAGPAL=[{bg:'#E8E4FA',tx:'#3A2880'},{bg:'#D0F5EE',tx:'#0E5A50'},{bg:'#FCE4F4',tx:'#7A1060'},{bg:'#F5F5C0',tx:'#484800'},{bg:'#FAD8D8',tx:'#801818'},{bg:'#CCE8FF',tx:'#0A3A70'},{bg:'#CCFADA',tx:'#0A5020'},{bg:'#FAE4C8',tx:'#703000'},{bg:'#EAE0FF',tx:'#3A1880'},{bg:'#C8F0FF',tx:'#083848'}];
 const tCC={};
-function tCol(t){if(tCC[t])return tCC[t];let h=0;for(const c of t)h=(h*31+c.charCodeAt(0))&0xFFFF;tCC[t]=TAGPAL[h%TAGPAL.length];return tCC[t];}
+function tCol(t){if(t==='Sonstiges')return{bg:'#EBEBEB',tx:'#6B6880'};if(tCC[t])return tCC[t];let h=0;for(const c of t)h=(h*31+c.charCodeAt(0))&0xFFFF;tCC[t]=TAGPAL[h%TAGPAL.length];return tCC[t];}
 
-const BASE_TAGS=['KI','KW','ESG','Cyber','Programm'];
+const BASE_TAGS=['KI','KW','ESG','Cyber','Programm','Digitale-Souveränität','360°','Sonstiges'];
 const TAG_CH={'KI':['KI-Days','KI-Werkstatt']};
 function getAllTags(){const all=[...BASE_TAGS,...(customTags||[])];const w=[];all.forEach(t=>{w.push(t);if(TAG_CH[t])TAG_CH[t].forEach(s=>w.push(s));});return[...new Set(w)];}
 
@@ -1088,7 +1088,7 @@ function render(){
     const badges=(item.types||[item.type]).map(t=>`<span class="badge badge-${t}" onclick="openTM('${item.id}')">${{todo:'To-do',handoff:'Übergabe',watch:'Beobachten',idea:'💡 Idee'}[t]||t}</span>`).join('');
     const isEd=editingId===item.id;
     // Tag picker for edit mode
-    const tagPicker=isEd?`<div class="edit-tag-strip">${getAllTags().map(t=>{const tc=tCol(t);const active=(item.tags||[]).includes(t);return`<span class="edit-tag-btn${active?' active':''}" style="background:${tc.bg};color:${tc.tx}${active?';border-color:'+tc.tx:''}" onclick="toggleEditTag('${item.id}','${esc(t)}')">#${esc(t)}</span>`;}).join('')}</div>`:'';
+    const tagPicker=isEd?`<div class="edit-tag-strip">${getAllTags().map(t=>{const tc=tCol(t);const active=(item.tags||[]).includes(t);const style=active?`background:${tc.bg};color:${tc.tx};border-color:${tc.tx}`:'';return`<span class="edit-tag-btn${active?' active':''}" style="${style}" onclick="toggleEditTag('${item.id}','${esc(t)}')">#${esc(t)}</span>`;}).join('')}</div>`:'';
     const txtP=isEd?`${tagPicker}<textarea class="edit-area" id="edit-${item.id}" rows="2">${esc(item.text)}</textarea><div class="edit-btns"><button class="sv-btn" onclick="saveEdit('${item.id}')">Speichern</button><button onclick="cancelEdit()">Abbrechen</button></div>`:`<div class="item-text" onclick="startEdit('${item.id}')">${esc(item.text)}</div>`;
     const cls=['item',item.done?'done':'',isMine&&!hasType(item,'handoff')?'mine':'',isIdea?'idea-item':'',isEd?'editing':''].filter(Boolean).join(' ');
     return`<div class="${cls}" draggable="true" data-id="${item.id}" ondragstart="onDragStart(event,'${item.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${item.id}')"><span class="drag-handle" title="Ziehen zum Sortieren">⠿</span><button class="chk${item.done?' on':''}" onclick="toggle('${item.id}')"></button><div class="item-body"><div class="item-top">${badges}${recurBadge}${mediaBadge}${pH}${persH}${tagH}${dlWrap}${hoBtn}${undoBtn}${ideaBtn}</div>${txtP}<div class="item-meta">${fmt(item.ts)}</div></div><button class="del-btn" onclick="del('${item.id}')">×</button></div>`;
@@ -1294,11 +1294,17 @@ function confirmPM(){if(!pmId)return;let person='';if(pmCreatingNew){const nn=do
 function clearPM(){
   const it=items.find(i=>i.id===pmId);
   if(it){
-    if(pmIsP){if(it.persons&&pmIdx>=0){it.persons.splice(pmIdx,1);it.persons=it.persons.filter(Boolean);}}
-    else{it.person='';}
+    if(pmIsP){
+      if(!it.persons)it.persons=[];
+      if(pmIdx>=0)it.persons.splice(pmIdx,1);
+      it.persons=it.persons.filter(Boolean);
+    } else {
+      it.person='';
+    }
     save();render();
   }
-  closePM();
+  document.getElementById('pm-modal').classList.remove('show');
+  pmId=null;pmCreatingNew=false;
 }
 document.getElementById('pm-inp').addEventListener('input',()=>bAC(document.getElementById('pm-inp'),document.getElementById('pm-ac')));
 document.getElementById('pm-inp').addEventListener('blur',()=>setTimeout(()=>{document.getElementById('pm-ac').style.display='none';},150));
@@ -1389,7 +1395,7 @@ function toggleEditTag(id,tag){
   save();
   // Re-render just the tag strip in edit mode without losing focus
   const strip=document.querySelector(`[data-id="${id}"] .edit-tag-strip`);
-  if(strip){strip.innerHTML=getAllTags().map(t=>{const tc=tCol(t);const active=(it.tags||[]).includes(t);return`<span class="edit-tag-btn${active?' active':''}" style="background:${tc.bg};color:${tc.tx}${active?';border-color:'+tc.tx:''}" onclick="toggleEditTag('${id}','${esc(t)}')">#${esc(t)}</span>`;}).join('');}
+  if(strip){strip.innerHTML=getAllTags().map(t=>{const tc=tCol(t);const active=(it.tags||[]).includes(t);const style=active?`background:${tc.bg};color:${tc.tx};border-color:${tc.tx}`:'';return`<span class="edit-tag-btn${active?' active':''}" style="${style}" onclick="toggleEditTag('${id}','${esc(t)}')">#${esc(t)}</span>`;}).join('');}
 }
 
 // ── @ mention + # tag support in edit textarea ──
