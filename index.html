@@ -398,7 +398,11 @@ table.mt tbody tr:hover td{background:var(--surface2)}
   .mob-nav{display:none}
   .mob-section{display:contents}
 }
-/* Drag & drop */
+/* Inline tag chips in closed tasks */
+.inline-tag-strip{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px}
+.inline-tag-btn{font-size:10px;font-weight:600;padding:2px 6px;border-radius:7px;cursor:pointer;border:1.5px solid transparent;background:var(--surface2);color:var(--text3);transition:all .15s}
+.inline-tag-btn:hover{background:var(--surface2);color:var(--text2);border-color:var(--border)}
+.inline-tag-btn.active{border-color:rgba(0,0,0,.2)!important}
 .item.dragging{opacity:.4;border:2px dashed var(--accent)!important}
 .item.drag-over-top{border-top:2.5px solid var(--accent)!important}
 .drag-handle{cursor:grab;color:var(--text3);font-size:14px;padding:0 2px;flex-shrink:0;user-select:none;align-self:center;opacity:.4;transition:opacity .15s}
@@ -720,8 +724,8 @@ table.mt tbody tr:hover td{background:var(--surface2)}
       <!-- List -->
       <div id="list-wrap">
         <div class="fbar" id="fbar">
-          <button class="f-btn" data-f="all">Alle</button>
-          <button class="f-btn active" data-f="mine">Meine To-dos</button>
+          <button class="f-btn active" data-f="all">Alle</button>
+          <button class="f-btn" data-f="mine">Meine To-dos</button>
           <button class="f-btn" data-f="watch">Beobachten</button>
           <button class="f-btn" data-f="handoff">&#220;bergeben</button>
           <button class="f-btn" data-f="idea">&#128161; Ideen</button>
@@ -886,7 +890,7 @@ const medienRef = ref(db,'medienPlanung');
 // ── State ──
 const STORE_ME='dashboard_myname';
 let items=[],myName=localStorage.getItem(STORE_ME)||'';
-let activeTypes=['todo'],activeFilter='mine';
+let activeTypes=['todo'],activeFilter='all';
 let activePersonFilter=null,activeTagFilter=null;
 let editingId=null,hmId=null,hmSel=null;
 let tmId=null,tmSel=[];
@@ -1166,10 +1170,11 @@ function render(){
     const undoBtn=!item.done&&hasType(item,'handoff')?`<button class="action-btn undo" onclick="undoHandoff('${item.id}')">↩ Zurücknehmen</button>`:'';
     const ideaBtn=isIdea&&!item.done?`<button class="action-btn idea-to-task" onclick="ideaToTask('${item.id}')">→ Als Task</button>`:'';
     const badges=(item.types||[item.type]).map(t=>`<span class="badge badge-${t}" onclick="openTM('${item.id}')">${{todo:'To-do',handoff:'Übergabe',watch:'Beobachten',idea:'💡 Idee'}[t]||t}</span>`).join('');
-    const isEd=editingId===item.id;
+    // Inline tag chips for closed task (not in edit mode)
+    const inlineTagChips=!isEd?`<div class="inline-tag-strip">${getAllTags().map(t=>{const tc=tCol(t);const active=(item.tags||[]).includes(t);const style=active?`background:${tc.bg};color:${tc.tx};border-color:${tc.tx}`:'';return`<span class="inline-tag-btn${active?' active':''}" style="${style}" onclick="toggleItemTag('${item.id}','${esc(t)}')" title="#${esc(t)}">#${esc(t)}</span>`;}).join('')}</div>`:'';
     // Tag picker for edit mode
     const tagPicker=isEd?`<div class="edit-tag-strip">${getAllTags().map(t=>{const tc=tCol(t);const active=(item.tags||[]).includes(t);const style=active?`background:${tc.bg};color:${tc.tx};border-color:${tc.tx}`:'';return`<span class="edit-tag-btn${active?' active':''}" style="${style}" onclick="toggleEditTag('${item.id}','${esc(t)}')">#${esc(t)}</span>`;}).join('')}</div>`:'';
-    const txtP=isEd?`${tagPicker}<textarea class="edit-area" id="edit-${item.id}" rows="2">${esc(item.text)}</textarea><div class="edit-btns"><button class="sv-btn" onclick="saveEdit('${item.id}')">Speichern</button><button onclick="cancelEdit()">Abbrechen</button></div>`:`<div class="item-text" onclick="startEdit('${item.id}')">${esc(item.text)}</div>`;
+    const txtP=isEd?`${tagPicker}<textarea class="edit-area" id="edit-${item.id}" rows="2">${esc(item.text)}</textarea><div class="edit-btns"><button class="sv-btn" onclick="saveEdit('${item.id}')">Speichern</button><button onclick="cancelEdit()">Abbrechen</button></div>`:`<div class="item-text" onclick="startEdit('${item.id}')">${fmtText(item.text)}</div>${inlineTagChips}`;
     const cls=['item',item.done?'done':'',isMine&&!hasType(item,'handoff')?'mine':'',isIdea?'idea-item':'',isEd?'editing':''].filter(Boolean).join(' ');
     return`<div class="${cls}" draggable="true" data-id="${item.id}" ondragstart="onDragStart(event,'${item.id}')" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${item.id}')"><span class="drag-handle" title="Ziehen zum Sortieren">⠿</span><button class="chk${item.done?' on':''}" onclick="toggle('${item.id}')"></button><div class="item-body"><div class="item-top">${badges}${recurBadge}${mediaBadge}${pH}${persH}${tagH}${dlWrap}${hoBtn}${undoBtn}${ideaBtn}</div>${txtP}<div class="item-meta">${fmt(item.ts)}</div></div><button class="del-btn" onclick="del('${item.id}')">×</button></div>`;
   }).join('');
@@ -1547,7 +1552,19 @@ function onDrop(e,targetId){
   save();render();dragSrcId=null;
 }
 
-// ── Toggle tag in edit mode ──
+// ── Format item text: newlines → bullet list ──
+function fmtText(text){
+  const lines=text.split('\n').filter(l=>l.trim());
+  if(lines.length<=1)return esc(text);
+  return '<ul style="margin:2px 0 0 14px;padding:0;list-style:disc">'+lines.map(l=>`<li style="margin-bottom:2px">${esc(l.replace(/^[-•*]\s*/,''))}</li>`).join('')+'</ul>';
+}
+function toggleItemTag(id,tag){
+  const it=items.find(i=>i.id===id);if(!it)return;
+  if(!it.tags)it.tags=[];
+  if(it.tags.includes(tag))it.tags=it.tags.filter(t=>t!==tag);
+  else it.tags.push(tag);
+  save();render();
+}
 function toggleEditTag(id,tag){
   const it=items.find(i=>i.id===id);if(!it)return;
   if(!it.tags)it.tags=[];
@@ -1625,6 +1642,7 @@ window.onDragStart=onDragStart;window.onDragOver=onDragOver;window.onDragLeave=o
 function toggleMedTable(bodyId,chevId){const b=document.getElementById(bodyId);const c=document.getElementById(chevId);if(!b)return;const open=b.style.display==='none';b.style.display=open?'block':'none';if(c)c.style.transform=open?'rotate(180deg)':'';}
 window.openMedienKanal=openMedienKanal;window.renderMedienSidebar=renderMedienSidebar;
 window.toggleMedTable=toggleMedTable;
+window.toggleItemTag=toggleItemTag;
 window.toggleBoardGroup=toggleBoardGroup;
 window.toggleHdrDD=toggleHdrDD;window.closeHdrDD=closeHdrDD;window.scrollToSB=scrollToSB;
 window.toggleDatenschutz=toggleDatenschutz;
