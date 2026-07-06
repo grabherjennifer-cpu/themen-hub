@@ -276,7 +276,49 @@ body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--
 .cal-det-item{display:flex;align-items:flex-start;gap:6px;padding:4px 0;border-bottom:1px solid var(--border)}
 .cal-det-item:last-child{border-bottom:none}
 
-/* ── MEDIEN BOARD ── */
+/* Medien Kalender Board */
+.med-wblock{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;overflow:hidden}
+.med-whdr{display:grid;grid-template-columns:75px repeat(5,1fr);border-bottom:1px solid var(--border);background:var(--surface2)}
+.med-kwlbl{font-size:11px;color:var(--text3);padding:5px 7px;display:flex;align-items:center;font-weight:600}
+.med-dhdr{padding:5px 7px;border-left:1px solid var(--border);cursor:pointer;transition:background .1s}
+.med-dhdr:hover{background:var(--surface2)}
+.med-dhdr.hasc{background:var(--surface)}
+.med-dhdr.istod{background:var(--todo-bg)}
+.med-dhdr.hol{opacity:.5;cursor:default}
+.med-dhdr.sel{outline:2px solid var(--accent);outline-offset:-2px}
+.med-dow{font-size:11px;color:var(--text3);display:block}
+.med-dhdr.istod .med-dow,.med-dhdr.istod .med-dnum{color:var(--todo-c)}
+.med-dnum{font-size:13px;font-weight:600;color:var(--text2)}
+.med-holn{font-size:10px;color:var(--text3);font-style:italic;display:block}
+.med-azchip{font-size:10px;font-weight:600;color:var(--handoff-c);background:var(--handoff-bg);padding:1px 4px;border-radius:3px;display:inline-block;margin-top:2px;line-height:1.4}
+.med-wbody{display:grid;grid-template-columns:75px repeat(5,1fr)}
+.med-mlbl{font-size:11px;font-weight:600;color:var(--text2);padding:4px 7px;border-top:1px solid var(--border);display:flex;align-items:center;gap:4px}
+.med-mdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.med-cell{border-left:1px solid var(--border);border-top:1px solid var(--border);padding:4px 5px;min-height:28px;cursor:pointer;transition:background .1s}
+.med-cell:hover{background:var(--surface2)}
+.med-cell.out{opacity:.25;pointer-events:none;background:var(--surface2)}
+.med-cell.tod{background:var(--todo-bg)}
+.med-cell.sel{outline:2px solid var(--accent);outline-offset:-2px}
+.med-cell-wk{border-left:1px solid var(--border);border-top:1px solid var(--border);padding:6px 7px;min-height:70px;cursor:pointer;transition:background .1s}
+.med-cell-wk:hover{background:var(--surface2)}
+.med-cell-wk.out{opacity:.25;pointer-events:none}
+.med-cell-wk.tod{background:var(--todo-bg)}
+.med-cell-wk.sel{outline:2px solid var(--accent);outline-offset:-2px}
+.med-chips{display:flex;flex-wrap:wrap;gap:2px}
+.med-chip{font-size:10px;font-weight:600;padding:2px 6px;border-radius:5px;color:white;line-height:1.4;border:none;cursor:default;white-space:nowrap}
+.med-chip-wk{font-size:11px;font-weight:600;padding:3px 7px;border-radius:5px;color:white;display:block;margin-bottom:3px;line-height:1.4;border:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.med-norow{grid-column:1/-1;border-top:1px solid var(--border);padding:5px 8px;font-size:11px;color:var(--text3);font-style:italic;background:var(--surface2)}
+.med-detpanel{display:none;border-top:2px solid var(--accent);padding:12px 14px;background:var(--surface2)}
+.med-detpanel.open{display:block}
+.med-det-date{font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.med-det-item{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.med-det-item:last-child{border-bottom:none}
+.med-det-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.med-det-med{font-size:12px;font-weight:600;color:var(--text)}
+.med-det-tag{font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;color:white;display:inline-block;margin-left:4px;vertical-align:middle}
+.med-det-ti{font-size:12px;color:var(--text2);margin-top:2px}
+.med-det-per{font-size:11px;color:var(--text3);margin-top:1px}
+.med-det-az{font-size:11px;color:var(--handoff-c);font-weight:600}
 .medien-wrap{display:none}.medien-wrap.show{display:flex;flex-direction:column;gap:.875rem}
 .medien-filter-bar{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
 .medien-filter-bar .f-btn{font-size:11px;padding:2px 8px}
@@ -736,78 +778,20 @@ table.mt tbody tr:hover td{background:var(--surface2)}
 
       <!-- Medien Board -->
       <div class="medien-wrap" id="medien-wrap">
-        <div style="display:flex;align-items:center;gap:.625rem;flex-wrap:wrap">
-          <span style="font-size:14px;font-weight:600">&#128240; Medien-Board</span>
-          <div style="margin-left:auto;display:flex;gap:.375rem;align-items:center">
-            <select id="med-tag-filter" style="font-size:12px;padding:3px 7px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text2);cursor:pointer" onchange="renderMedien()">
-              <option value="">Alle Themen</option>
-            </select>
-            <select id="med-year-filter" style="font-size:12px;padding:3px 7px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text2);cursor:pointer" onchange="renderMedien()">
-              <option value="2026">2026</option>
-              <option value="2027">2027</option>
-            </select>
+        <!-- Redaktionsplan Header -->
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:.5rem">
+          <button class="f-btn" onclick="medNavPeriod(-1)" style="padding:3px 10px;font-size:13px">&#8249;</button>
+          <span id="med-period-lbl" style="font-size:14px;font-weight:600;min-width:200px"></span>
+          <button class="f-btn" onclick="medNavPeriod(1)" style="padding:3px 10px;font-size:13px">&#8250;</button>
+          <button class="f-btn" onclick="medNavPeriod(0)" style="font-size:11px">Heute</button>
+          <div style="display:flex;gap:3px;margin-left:4px">
+            <button id="med-btn-mo" class="view-btn active" onclick="setMedView('mo')">Monat</button>
+            <button id="med-btn-kw" class="view-btn" onclick="setMedView('kw')">Woche</button>
           </div>
+          <button class="medien-add-btn" onclick="openMedM()" style="margin-left:auto">+ Platzierung erfassen</button>
         </div>
-
-        <!-- Medien Board top: upcoming left, kanäle right -->
-        <div style="display:grid;grid-template-columns:220px 1fr;gap:.875rem;align-items:start">
-          <!-- Nächste 2 Wochen -->
-          <div>
-            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:.5rem" id="med-upcoming-lbl">Nächste 2 Wochen</div>
-            <div id="med-upcoming-list" style="display:flex;flex-direction:column;gap:4px"></div>
-          </div>
-          <!-- Kanal-Kacheln -->
-          <div class="kanal-grid" id="kanal-grid"></div>
-        </div>
-
-        <!-- Platzierungen Tabelle -->
-        <div class="medien-table-wrap">
-          <div class="medien-table-hdr">
-            <span class="medien-table-title">Platzierungen</span>
-            <button class="medien-add-btn" onclick="openMedM()">+ Platzierung erfassen</button>
-          </div>
-          <div style="overflow-x:auto">
-            <table class="mt">
-              <thead><tr><th>Kanal</th><th>Datum / Ausgabe</th><th>Titel</th><th>Thema</th><th>Person</th><th>AZ-Schluss</th><th></th></tr></thead>
-              <tbody id="med-tbody"></tbody>
-            </table>
-            <div id="med-empty" class="empty-st" style="display:none">Noch keine Platzierungen &#8212; klicke &#8222;+ Platzierung erfassen&#8220;</div>
-          </div>
-        </div>
-
-        <!-- Auswertung -->
-        <div>
-          <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.625rem">Auswertung</div>
-          <div class="auswertung-grid" id="ausw-grid"></div>
-        </div>
-
-        <!-- DIWI Terminkalender — eingeklappt -->
-        <div class="medien-table-wrap">
-          <div class="medien-table-hdr" onclick="toggleMedTable('diwi-table-body','diwi-table-chev')" style="cursor:pointer">
-            <span class="medien-table-title">DIWI &#8212; Ausgaben 2026</span>
-            <span id="diwi-table-chev" style="font-size:12px;color:var(--text3)">&#9662;</span>
-          </div>
-          <div id="diwi-table-body" style="display:none;overflow-x:auto">
-            <table class="mt">
-              <thead><tr><th>Nr.</th><th>Erscheinen</th><th>Sonderthema</th><th>AZ-Schluss</th><th></th></tr></thead>
-              <tbody id="diwi-tbody"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Thema Vorarlberg — eingeklappt -->
-        <div class="medien-table-wrap">
-          <div class="medien-table-hdr" onclick="toggleMedTable('tv-table-body','tv-table-chev')" style="cursor:pointer">
-            <span class="medien-table-title">Thema Vorarlberg &#8212; Ausgaben 2026</span>
-            <span id="tv-table-chev" style="font-size:12px;color:var(--text3)">&#9662;</span>
-          </div>
-          <div id="tv-table-body" style="display:none;overflow-x:auto">
-            <table class="mt">
-              <thead><tr><th>Erscheinen</th><th>Schwerpunktthema</th><th></th></tr></thead>
-              <tbody id="tv-tbody"></tbody>
-            </table>
-          </div>
-        </div>
+        <!-- Kalender Board -->
+        <div id="med-board"></div>
       </div>
     </div>
   </div>
@@ -1170,6 +1154,7 @@ function render(){
     const undoBtn=!item.done&&hasType(item,'handoff')?`<button class="action-btn undo" onclick="undoHandoff('${item.id}')">↩ Zurücknehmen</button>`:'';
     const ideaBtn=isIdea&&!item.done?`<button class="action-btn idea-to-task" onclick="ideaToTask('${item.id}')">→ Als Task</button>`:'';
     const badges=(item.types||[item.type]).map(t=>`<span class="badge badge-${t}" onclick="openTM('${item.id}')">${{todo:'To-do',handoff:'Übergabe',watch:'Beobachten',idea:'💡 Idee'}[t]||t}</span>`).join('');
+    const isEd=editingId===item.id;
     // Inline tag chips for closed task (not in edit mode)
     const inlineTagChips=!isEd?`<div class="inline-tag-strip">${getAllTags().map(t=>{const tc=tCol(t);const active=(item.tags||[]).includes(t);const style=active?`background:${tc.bg};color:${tc.tx};border-color:${tc.tx}`:'';return`<span class="inline-tag-btn${active?' active':''}" style="${style}" onclick="toggleItemTag('${item.id}','${esc(t)}')" title="#${esc(t)}">#${esc(t)}</span>`;}).join('')}</div>`:'';
     // Tag picker for edit mode
@@ -1180,214 +1165,32 @@ function render(){
   }).join('');
 }
 
-// ── Medien Board ──
-function renderMedUpcoming(){
-  const today=new Date();today.setHours(0,0,0,0);
-  const weekEnd=new Date(today);weekEnd.setDate(today.getDate()+14);
-  const lbl=document.getElementById('med-upcoming-lbl');
-  if(lbl)lbl.textContent=`${today.toLocaleDateString('de-AT',{day:'2-digit',month:'2-digit'})} – ${weekEnd.toLocaleDateString('de-AT',{day:'2-digit',month:'2-digit'})}`;
-  const el=document.getElementById('med-upcoming-list');if(!el)return;
-  // Collect planned items from medienPlanung
-  const planned=medienPlanung.filter(p=>{
-    if(!p.datum)return false;
-    const parts=p.datum.split('.');if(parts.length<3)return false;
-    const d=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));
-    return d>=today&&d<=weekEnd;
-  });
-  // Also add fixed DIWI/TV dates even without planung
-  const fixed=[];
-  DIWI.filter(d=>{const parts=d.datum.split('.');const dt=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));return dt>=today&&dt<=weekEnd;}).forEach(d=>{if(!medienPlanung.some(p=>p.kanal==='diwi'&&p.diwiNr===d.nr))fixed.push({kanal:'diwi',datum:d.datum,label:`DIWI #${d.nr}`,sub:d.thema.slice(0,30)+(d.thema.length>30?'…':''),az:d.az,color:'#C08020'});});
-  THEMA_VBG.filter(t=>{const parts=t.datum.split('.');const dt=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));return dt>=today&&dt<=weekEnd;}).forEach(t=>{fixed.push({kanal:'thema_vbg',datum:t.datum,label:'Thema Vorarlberg',sub:t.thema.slice(0,30)+(t.thema.length>30?'…':''),color:'#D4537E'});});
-  const allItems=[...planned.map(p=>{const k=KANALE.find(k=>k.id===p.kanal)||{color:'#888',name:p.kanal};return{kanal:p.kanal,datum:p.datum,label:k.name+(p.diwiNr?` #${p.diwiNr}`:''),sub:p.titel||p.tag||'',color:k.color,az:p.kanal==='diwi'&&p.diwiNr?(DIWI.find(d=>d.nr===p.diwiNr)||{}).az:''};}), ...fixed].sort((a,b)=>{const da=a.datum.split('.').reverse().join('-');const db=b.datum.split('.').reverse().join('-');return da.localeCompare(db);});
-  if(!allItems.length){el.innerHTML=`<div style="font-size:12px;color:var(--text3);font-style:italic;padding:4px 2px">Keine geplanten Einträge</div>`;return;}
-  el.innerHTML=allItems.map(e=>{
-    let azBadge='';
-    if(e.az){const azP=e.az.split('.');const azD=new Date(parseInt('20'+azP[2]),parseInt(azP[1])-1,parseInt(azP[0]));const diff=Math.round((azD-today)/86400000);if(diff<0)azBadge=`<span style="font-size:10px;background:#FDEAEA;color:#A03040;padding:1px 4px;border-radius:3px;white-space:nowrap">AZ vorbei</span>`;else if(diff<=3)azBadge=`<span style="font-size:10px;background:#FDEAEA;color:#A03040;padding:1px 4px;border-radius:3px;white-space:nowrap">AZ ${e.az}</span>`;else if(diff<=7)azBadge=`<span style="font-size:10px;background:#FFF8DC;color:#8A5A00;padding:1px 4px;border-radius:3px;white-space:nowrap">AZ ${e.az}</span>`;}
-    return`<div onclick="toggleMedKanal('${e.kanal}')" style="display:flex;align-items:flex-start;gap:6px;padding:5px 7px;border-radius:6px;background:var(--surface);border:1px solid var(--border);cursor:pointer;transition:background .1s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='var(--surface)'">
-      <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;background:${e.color}"></div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.label)}</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:1px">${esc(e.datum)}${e.sub?' · '+esc(e.sub):''}</div>
-      </div>
-      ${azBadge}
-    </div>`;
-  }).join('');
-}
-// ── Medien Board render ──
-function renderMedien(){
-  renderMedUpcoming();
-  // Kanal-Kacheln
-  const tagF=document.getElementById('med-tag-filter').value;
-  const yearF=parseInt(document.getElementById('med-year-filter').value)||2026;
-  const kaGrid=document.getElementById('kanal-grid');
-  kaGrid.innerHTML=KANALE.map(k=>{
-    const cnt=medienPlanung.filter(p=>p.kanal===k.id&&(!tagF||p.tag===tagF)).length;
-    const active=medKanalFilter===k.id;
-    return`<div class="kanal-card${active?' active':''}" style="border-left-color:${k.color}" onclick="toggleMedKanal('${k.id}')">
-      <div class="kanal-dot" style="background:${k.color}"></div>
-      <div><div class="kanal-name">${esc(k.name)}</div><div class="kanal-info">${esc(k.info)}</div></div>
-    </div>`;
-  }).join('');
+// ── Format item text ──
+function fmtText(text){const lines=text.split('\n').filter(l=>l.trim());if(lines.length<=1)return esc(text);return '<ul style="margin:2px 0 0 14px;padding:0;list-style:disc">'+lines.map(l=>`<li style="margin-bottom:2px">${esc(l.replace(/^[-•*]\s*/,''))}</li>`).join('')+'</ul>';}
 
-  // Platzierungen Tabelle
-  let list=medienPlanung;
-  if(medKanalFilter)list=list.filter(p=>p.kanal===medKanalFilter);
-  if(tagF)list=list.filter(p=>p.tag===tagF);
-  list=[...list].sort((a,b)=>a.datum.localeCompare(b.datum));
-  const tbody=document.getElementById('med-tbody');
-  const empty=document.getElementById('med-empty');
-  if(!list.length){tbody.innerHTML='';empty.style.display='block';}
-  else{empty.style.display='none';tbody.innerHTML=list.map((p,i)=>{
-    const k=KANALE.find(kk=>kk.id===p.kanal)||{name:p.kanal,color:'#888'};
-    let datumLabel=p.datum;
-    let azLabel='';
-    if(p.kanal==='diwi'&&p.diwiNr){const d=DIWI.find(d=>d.nr===p.diwiNr);if(d){datumLabel=`<span class="diwi-tooltip" data-tip="${esc(d.thema)} · ${esc(d.datum)}">DIWI #${d.nr}${d.ga?'<span class="med-ga">★</span>':''}</span>`;azLabel=`<span class="med-az">${esc(d.az)}</span>`;}}
-    const tagC=p.tag?tCol(p.tag):{bg:'var(--surface2)',tx:'var(--text3)'};
-    const person=p.person||'';
-    const pc=person?pCol(person):null;
-    return`<tr>
-      <td><span class="med-kanal-badge" style="background:${k.color}18;color:${k.color}"><span class="med-dot" style="background:${k.color}"></span>${esc(k.name)}</span></td>
-      <td>${datumLabel}</td>
-      <td style="font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.titel||'')}</td>
-      <td>${p.tag?`<span class="i-ttag" style="background:${tagC.bg};color:${tagC.tx}">#${esc(p.tag)}</span>`:''}</td>
-      <td>${pc?`<span class="ptag" style="background:${pc.bg};color:${pc.tx}"><span class="ptag-av" style="background:${pc.av};color:#fff">${esc(ini(person))}</span>${esc(person)}</span>`:'<span style="color:var(--text3);font-size:12px">—</span>'}</td>
-      <td>${azLabel}</td>
-      <td><button class="del-btn" onclick="delMed(${medienPlanung.indexOf(p)})" title="Löschen">×</button></td>
-    </tr>`;
-  }).join('');}
-
-  // Auswertung
-  renderAuswertung(list);
-
-  // DIWI Tabelle
-  document.getElementById('diwi-tbody').innerHTML=DIWI.map(d=>{
-    const placed=medienPlanung.filter(p=>p.kanal==='diwi'&&p.diwiNr===d.nr);
-    const today=new Date();today.setHours(0,0,0,0);
-    const parts=d.datum.split('.');const erschDt=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));
-    const isPast=erschDt<today;
-    return`<tr style="${isPast?'opacity:.5':''}">
-      <td><strong>DIWI #${d.nr}</strong>${d.ga?`<span class="med-ga">★ Großauflage</span>`:''}</td>
-      <td>${esc(d.datum)}</td>
-      <td>${esc(d.thema)}</td>
-      <td><span class="med-az">${esc(d.az)}</span></td>
-      <td><button class="medien-add-btn" style="font-size:11px;padding:2px 7px" onclick="openMedMDiwi(${d.nr})">+ Planen</button>${placed.length>0?`<span style="font-size:11px;color:#1A6B62;margin-left:4px">✓ ${placed.length}</span>`:''}</td>
-    </tr>`;
-  }).join('');
-
-  // Thema Vorarlberg Tabelle
-  document.getElementById('tv-tbody').innerHTML=THEMA_VBG.map(t=>{
-    const placed=medienPlanung.filter(p=>p.kanal==='thema_vbg'&&p.datum===t.datum);
-    return`<tr>
-      <td>${esc(t.datum)}</td>
-      <td>${esc(t.thema)}</td>
-      <td><button class="medien-add-btn" style="font-size:11px;padding:2px 7px" onclick="openMedMTV('${esc(t.datum)}')">+ Planen</button>${placed.length>0?`<span style="font-size:11px;color:#1A6B62;margin-left:4px">✓</span>`:''}</td>
-    </tr>`;
-  }).join('');
-}
-
-function renderAuswertung(list){
-  const grid=document.getElementById('ausw-grid');
-  // By Kanal
-  const byKanal={};KANALE.forEach(k=>byKanal[k.id]=0);list.forEach(p=>{if(byKanal[p.kanal]!==undefined)byKanal[p.kanal]++;else byKanal[p.kanal]=1;});
-  const maxK=Math.max(1,...Object.values(byKanal));
-  // By Tag
-  const byTag={};list.forEach(p=>{if(p.tag){byTag[p.tag]=(byTag[p.tag]||0)+1;}});
-  const maxT=Math.max(1,...Object.values(byTag));
-  // By Month
-  const byMonth={};list.forEach(p=>{if(p.datum){const parts=p.datum.split('.');const mo=parseInt(parts[1])-1;const lbl=MNAMES[mo]||p.datum;byMonth[lbl]=(byMonth[lbl]||0)+1;}});
-  const maxM=Math.max(1,...Object.values(byMonth));
-
-  grid.innerHTML=`
-    <div class="ausw-card">
-      <div class="ausw-title">Nach Kanal</div>
-      <div class="ausw-bar-wrap">
-        ${KANALE.filter(k=>byKanal[k.id]>0).map(k=>`<div class="ausw-bar-item"><span class="ausw-bar-label">${esc(k.name)}</span><div class="ausw-bar-bg"><div class="ausw-bar-fill" style="width:${Math.round(byKanal[k.id]/maxK*100)}%;background:${k.color}"></div></div><span class="ausw-bar-num">${byKanal[k.id]}</span></div>`).join('')||'<div style="font-size:12px;color:var(--text3)">Keine Daten</div>'}
-      </div>
-    </div>
-    <div class="ausw-card">
-      <div class="ausw-title">Nach Thema</div>
-      <div class="ausw-bar-wrap">
-        ${Object.entries(byTag).sort((a,b)=>b[1]-a[1]).map(([t,n])=>{const c=tCol(t);return`<div class="ausw-bar-item"><span class="ausw-bar-label">#${esc(t)}</span><div class="ausw-bar-bg"><div class="ausw-bar-fill" style="width:${Math.round(n/maxT*100)}%;background:${c.tx}"></div></div><span class="ausw-bar-num">${n}</span></div>`;}).join('')||'<div style="font-size:12px;color:var(--text3)">Keine Daten</div>'}
-      </div>
-    </div>
-    <div class="ausw-card">
-      <div class="ausw-title">Nach Monat</div>
-      <div class="ausw-bar-wrap">
-        ${Object.entries(byMonth).map(([m,n])=>`<div class="ausw-bar-item"><span class="ausw-bar-label">${esc(m)}</span><div class="ausw-bar-bg"><div class="ausw-bar-fill" style="width:${Math.round(n/maxM*100)}%;background:var(--accent)"></div></div><span class="ausw-bar-num">${n}</span></div>`).join('')||'<div style="font-size:12px;color:var(--text3)">Keine Daten</div>'}
-      </div>
-    </div>
-  `;
-}
-
-function toggleMedKanal(id){medKanalFilter=(medKanalFilter===id)?null:id;renderMedien();}
-function delMed(idx){medienPlanung.splice(idx,1);saveMedien();renderMedien();}
-
-// Medien Tag filter update
-function updateMedTagFilter(){
-  const sel=document.getElementById('med-tag-filter');
-  if(!sel)return;
-  const cur=sel.value;
-  sel.innerHTML='<option value="">Alle Themen</option>'+getAllTags().map(t=>`<option value="${esc(t)}"${t===cur?' selected':''}>${esc(t)}</option>`).join('');
-}
-
-// ── Medien Modal ──
-function openMedM(diwiNr,tvDatum){
-  const sel=document.getElementById('medm-kanal');
-  sel.innerHTML=KANALE.map(k=>`<option value="${k.id}">${esc(k.name)}</option>`).join('');
-  if(diwiNr){sel.value='diwi';const d=DIWI.find(d=>d.nr===diwiNr);if(d){document.getElementById('medm-datum').value=d.datum;document.getElementById('medm-diwi-hint').style.display='block';document.getElementById('medm-diwi-hint').textContent=`DIWI #${d.nr}: ${d.thema} · AZ-Schluss: ${d.az}`;}}
-  else if(tvDatum){sel.value='thema_vbg';document.getElementById('medm-datum').value=tvDatum;document.getElementById('medm-diwi-hint').style.display='none';}
-  else{document.getElementById('medm-datum').value='';document.getElementById('medm-diwi-hint').style.display='none';}
-  // Tags
-  const tagSel=document.getElementById('medm-tag');tagSel.innerHTML='<option value="">Kein Tag</option>'+getAllTags().map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
-  // Persons
-  const pSel=document.getElementById('medm-person');pSel.innerHTML='<option value="">Keine Person</option>'+window._teamList.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
-  document.getElementById('medm-titel').value='';
-  document.getElementById('medm-status').value='geplant';
-  document.getElementById('medm-create-task').checked=true;
-  // DIWI Nr hint
-  sel.addEventListener('change',()=>{const hint=document.getElementById('medm-diwi-hint');if(sel.value==='diwi'){hint.style.display='block';}else hint.style.display='none';});
-  document.getElementById('medm-modal').classList.add('show');
-}
-function openMedMDiwi(nr){openMedM(nr,null);}
-function openMedMTV(datum){openMedM(null,datum);}
-function closeMedM(){document.getElementById('medm-modal').classList.remove('show');}
-function confirmMedM(){
-  const kanal=document.getElementById('medm-kanal').value;
-  const datum=document.getElementById('medm-datum').value.trim();
-  const titel=document.getElementById('medm-titel').value.trim();
-  const tag=document.getElementById('medm-tag').value;
-  const person=document.getElementById('medm-person').value;
-  const status=document.getElementById('medm-status').value;
-  if(!kanal||!datum)return;
-  const k=KANALE.find(k=>k.id===kanal);
-  // Find DIWI Nr if applicable
-  let diwiNr=null;
-  if(kanal==='diwi'){const d=DIWI.find(d=>d.datum===datum);if(d)diwiNr=d.nr;}
-  const entry={id:Date.now().toString(),kanal,datum,titel,tag,person,status,diwiNr,ts:Date.now()};
-  medienPlanung.push(entry);saveMedien();
-  // Create task if checked
-  if(document.getElementById('medm-create-task').checked){
-    const kName=k?k.name:kanal;
-    let taskText=`${kName}`;
-    if(diwiNr)taskText=`DIWI #${diwiNr}`;
-    else if(kanal==='thema_vbg')taskText=`Thema Vorarlberg ${datum}`;
-    if(titel)taskText+=`: ${titel}`;
-    // AZ as deadline
-    let dl=null;
-    if(diwiNr){const d=DIWI.find(d=>d.nr===diwiNr);if(d){const az=d.az.split('.');dl=new Date(parseInt('20'+az[2]),parseInt(az[1])-1,parseInt(az[0]));}}
-    const item={id:Date.now().toString(),types:['todo'],text:taskText,person:person||'',persons:[],deadline:dl?dl.toISOString():null,tags:tag?[tag]:[],done:false,ts:Date.now(),_medienLink:kName};
-    items.unshift(item);save();render();
-  }
-  closeMedM();renderMedien();
-}
-document.getElementById('medm-modal').addEventListener('click',e=>{if(e.target===document.getElementById('medm-modal'))closeMedM();});
-// med-fbar removed (status filter no longer needed)
-
-// ── Autocomplete ──
+// ── Autocomplete helper ──
 function bAC(inp,acEl){const v=inp.value.trim().toLowerCase();if(!v){acEl.style.display='none';return;}const s=window._teamList.filter(t=>t.toLowerCase().startsWith(v)||t.toLowerCase().split(' ').some(p=>p.startsWith(v))).slice(0,6);if(!s.length){acEl.style.display='none';return;}acEl.innerHTML=s.map(n=>{const c=pCol(n);return`<div class="ac-item" onmousedown="sAC('${esc(n)}','${inp.id}','${acEl.id}')"><div class="ac-av" style="background:${c.av};color:#fff">${esc(ini(n))}</div>${esc(n)}</div>`;}).join('');acEl.style.display='block';}
 function sAC(name,inpId,acId){document.getElementById(inpId).value=name;document.getElementById(acId).style.display='none';}
 
+// ── Edit TA with @ and # support ──
+let editMentionAnchor=-1;
+function setupEditTA(id){const ta=document.getElementById('edit-'+id);if(!ta)return;ta.addEventListener('input',()=>{const val=ta.value;const pos=ta.selectionStart;const bc=val.slice(0,pos);const atM=bc.match(/@([A-Za-zÄÖÜäöüß]*)$/);const hashM=bc.match(/#([A-Za-zÄÖÜäöüß0-9]*)$/);let hint=ta.parentNode.querySelector('.edit-inline-drop');if(!hint){hint=document.createElement('div');hint.className='edit-inline-drop ac-list';hint.style.cssText='position:relative;z-index:60;margin-bottom:3px';ta.parentNode.insertBefore(hint,ta);}if(atM){editMentionAnchor=bc.lastIndexOf('@');const frag=atM[1].toLowerCase();const sugg=window._teamList.filter(t=>!frag||t.toLowerCase().split(' ').some(p=>p.startsWith(frag))||t.toLowerCase().startsWith(frag)).slice(0,5);if(sugg.length){hint.innerHTML=sugg.map(n=>{const c=pCol(n);return`<div class="ac-item" onmousedown="insertEditMention('${id}','${esc(n)}')"><div class="ac-av" style="background:${c.av};color:#fff">${esc(ini(n))}</div>${esc(n)}</div>`;}).join('');hint.style.display='block';return;}}else if(hashM){const frag=hashM[1].toUpperCase();const sugg=getAllTags().filter(t=>!frag||t.startsWith(frag)).slice(0,6);if(sugg.length){hint.innerHTML=sugg.map(t=>{const tc=tCol(t);return`<div class="ac-item" onmousedown="insertEditHash('${id}','${esc(t)}')"><span style="font-size:11px;font-weight:700;padding:1px 5px;border-radius:5px;background:${tc.bg};color:${tc.tx}">#${esc(t)}</span></div>`;}).join('');hint.style.display='block';return;}}hint.style.display='none';});ta.addEventListener('blur',()=>{setTimeout(()=>{const hint=ta.parentNode.querySelector('.edit-inline-drop');if(hint)hint.style.display='none';},150);});}
+function insertEditMention(id,name){const ta=document.getElementById('edit-'+id);if(!ta)return;const val=ta.value;const before=val.slice(0,editMentionAnchor);const after=val.slice(ta.selectionEnd||editMentionAnchor);ta.value=before+'@'+name.split(' ')[0]+' '+after.replace(/^[A-Za-zÄÖÜäöüß]*/,'');const hint=ta.parentNode.querySelector('.edit-inline-drop');if(hint)hint.style.display='none';ta.focus();}
+function insertEditHash(id,tag){const ta=document.getElementById('edit-'+id);if(!ta)return;const val=ta.value;const pos=ta.selectionStart;const bc=val.slice(0,pos);const hashStart=bc.lastIndexOf('#');const before=val.slice(0,hashStart);const after=val.slice(pos);ta.value=before+'#'+tag+' '+after;const hint=ta.parentNode.querySelector('.edit-inline-drop');if(hint)hint.style.display='none';const it=items.find(i=>i.id===id);if(it){if(!it.tags)it.tags=[];if(!it.tags.includes(tag))it.tags.push(tag);}ta.focus();}
+
+// ── Toggle tags ──
+function toggleItemTag(id,tag){const it=items.find(i=>i.id===id);if(!it)return;if(!it.tags)it.tags=[];if(it.tags.includes(tag))it.tags=it.tags.filter(t=>t!==tag);else it.tags.push(tag);save();render();}
+function toggleEditTag(id,tag){const it=items.find(i=>i.id===id);if(!it)return;if(!it.tags)it.tags=[];if(it.tags.includes(tag))it.tags=it.tags.filter(t=>t!==tag);else it.tags.push(tag);save();const strip=document.querySelector(`[data-id="${id}"] .edit-tag-strip`);if(strip){strip.innerHTML=getAllTags().map(t=>{const tc=tCol(t);const active=(it.tags||[]).includes(t);const style=active?`background:${tc.bg};color:${tc.tx};border-color:${tc.tx}`:'';return`<span class="edit-tag-btn${active?' active':''}" style="${style}" onclick="toggleEditTag('${id}','${esc(t)}')">#${esc(t)}</span>`;}).join('');}}
+
+// ── Drag & Drop ──
+let dragSrcId=null;
+function onDragStart(e,id){dragSrcId=id;e.dataTransfer.effectAllowed='move';setTimeout(()=>{const el=document.querySelector(`[data-id="${id}"]`);if(el)el.classList.add('dragging');},0);}
+function onDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';e.currentTarget.classList.add('drag-over-top');}
+function onDragLeave(e){e.currentTarget.classList.remove('drag-over-top');}
+function onDrop(e,targetId){e.preventDefault();e.currentTarget.classList.remove('drag-over-top');document.querySelectorAll('.item').forEach(el=>{el.classList.remove('dragging','drag-over-top');});if(!dragSrcId||dragSrcId===targetId)return;const srcIdx=items.findIndex(i=>i.id===dragSrcId);const tgtIdx=items.findIndex(i=>i.id===targetId);if(srcIdx<0||tgtIdx<0)return;const[moved]=items.splice(srcIdx,1);items.splice(tgtIdx,0,moved);save();render();dragSrcId=null;}
+
 // ── Handoff Modal ──
+let hmSel=null;
 function openHM(id){hmId=id;hmSel=null;const it=items.find(i=>i.id===id);if(!it)return;document.getElementById('hm-text').textContent=it.text;const picker=document.getElementById('hm-team-picker');const allP=[{name:myName||'Ich',isSelf:true},...window._teamList.filter(n=>!myName||n.toLowerCase()!==myName.toLowerCase()).map(n=>({name:n,isSelf:false}))];picker.innerHTML=allP.map(p=>{const c=pCol(p.name);return`<div class="team-pick-item" id="tpi-${esc(p.name)}" onclick="hmPickPerson('${esc(p.name)}')" style="background:${c.bg};color:${c.tx}"><div class="ac-av" style="background:${c.av};color:#fff;border-radius:50%;width:22px;height:22px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${esc(ini(p.name))}</div>${esc(p.name)}${p.isSelf?' (ich)':''}</div>`;}).join('');document.getElementById('hm-modal').classList.add('show');}
 function hmPickPerson(name){hmSel=name;document.querySelectorAll('.team-pick-item').forEach(el=>el.classList.remove('selected'));const el=document.getElementById('tpi-'+name);if(el)el.classList.add('selected');}
 function closeHM(){document.getElementById('hm-modal').classList.remove('show');hmId=null;hmSel=null;}
@@ -1406,37 +1209,23 @@ function switchToNewPerson(){pmCreatingNew=true;document.getElementById('pm-new-
 function openPM(id,isP,idx){pmId=id;pmIsP=isP;pmIdx=idx;pmCreatingNew=false;const it=items.find(i=>i.id===id);if(!it)return;const cur=isP?(it.persons||[])[idx]||'':it.person||'';document.getElementById('pm-inp').value=cur;document.getElementById('pm-inp').style.display='';document.getElementById('pm-new-wrap').style.display='none';document.getElementById('pm-new-inp').value='';document.getElementById('pm-ac').style.display='none';document.getElementById('pm-modal').classList.add('show');setTimeout(()=>document.getElementById('pm-inp').focus(),50);}
 function closePM(){document.getElementById('pm-modal').classList.remove('show');pmId=null;pmCreatingNew=false;}
 function confirmPM(){if(!pmId)return;let person='';if(pmCreatingNew){const nn=document.getElementById('pm-new-inp').value.trim();if(nn&&!window._teamList.includes(nn)){const ci=getNextFreeColor();window._teamList.push(nn);if(!window._teamColors)window._teamColors={};window._teamColors[nn]=ci;delete cCache[nn];saveTeam();}person=nn;}else{const raw=document.getElementById('pm-inp').value.trim();person=raw?rPN(raw):'';}const it=items.find(i=>i.id===pmId);if(it){if(pmIsP){if(!it.persons)it.persons=[];if(pmIdx>=0)it.persons[pmIdx]=person;else it.persons.push(person);it.persons=it.persons.filter(Boolean);}else it.person=person;}save();render();closePM();}
-function clearPM(){
-  const it=items.find(i=>i.id===pmId);
-  if(it){
-    if(pmIsP){
-      if(!it.persons)it.persons=[];
-      if(pmIdx>=0)it.persons.splice(pmIdx,1);
-      it.persons=it.persons.filter(Boolean);
-    } else {
-      it.person='';
-    }
-    save();render();
-  }
-  document.getElementById('pm-modal').classList.remove('show');
-  pmId=null;pmCreatingNew=false;
-}
+function clearPM(){const it=items.find(i=>i.id===pmId);if(it){if(pmIsP){if(!it.persons)it.persons=[];if(pmIdx>=0){it.persons.splice(pmIdx,1);it.persons=it.persons.filter(Boolean);}}else{it.person='';}save();render();}document.getElementById('pm-modal').classList.remove('show');pmId=null;pmCreatingNew=false;}
 document.getElementById('pm-inp').addEventListener('input',()=>bAC(document.getElementById('pm-inp'),document.getElementById('pm-ac')));
 document.getElementById('pm-inp').addEventListener('blur',()=>setTimeout(()=>{document.getElementById('pm-ac').style.display='none';},150));
 document.getElementById('pm-inp').addEventListener('keydown',e=>{if(e.key==='Enter')confirmPM();if(e.key==='Escape')closePM();});
 document.getElementById('pm-modal').addEventListener('click',e=>{if(e.target===document.getElementById('pm-modal'))closePM();});
 
-// ── Add Person ──
+// ── Add Person Modal ──
 function openAPM(){document.getElementById('apm-inp').value='';document.getElementById('apm-modal').classList.add('show');setTimeout(()=>document.getElementById('apm-inp').focus(),50);}
 function closeAPM(){document.getElementById('apm-modal').classList.remove('show');}
 function confirmAPM(){const name=document.getElementById('apm-inp').value.trim();if(!name)return;if(!window._teamList.includes(name)){const ci=getNextFreeColor();window._teamList.push(name);if(!window._teamColors)window._teamColors={};window._teamColors[name]=ci;delete cCache[name];saveTeam();}closeAPM();renderPersonSB();}
 document.getElementById('apm-inp').addEventListener('keydown',e=>{if(e.key==='Enter')confirmAPM();if(e.key==='Escape')closeAPM();});
 document.getElementById('apm-modal').addEventListener('click',e=>{if(e.target===document.getElementById('apm-modal'))closeAPM();});
 
-// ── Add Tag ──
+// ── Add Tag Modal ──
 function openATM(){document.getElementById('atm-inp').value='';document.getElementById('atm-modal').classList.add('show');setTimeout(()=>document.getElementById('atm-inp').focus(),50);}
 function closeATM(){document.getElementById('atm-modal').classList.remove('show');}
-function confirmATM(){const t=document.getElementById('atm-inp').value.trim().toUpperCase().replace(/[^A-ZÄÖÜ0-9_-]/g,'');if(!t)return;if(!customTags.includes(t)){customTags.push(t);set(tagsRef,customTags);}closeATM();renderTagStrip();renderTagSB();updateMedTagFilter();}
+function confirmATM(){const t=document.getElementById('atm-inp').value.trim().toUpperCase().replace(/[^A-ZÄÖÜ0-9_-]/g,'');if(!t)return;if(!customTags.includes(t)){customTags.push(t);set(tagsRef,customTags);}closeATM();renderTagStrip();renderTagSB();}
 document.getElementById('atm-inp').addEventListener('keydown',e=>{if(e.key==='Enter')confirmATM();if(e.key==='Escape')closeATM();});
 document.getElementById('atm-modal').addEventListener('click',e=>{if(e.target===document.getElementById('atm-modal'))closeATM();});
 
@@ -1459,19 +1248,15 @@ function renderCalDet(y,m,d){const hits=itemsOnDay(y,m,d);const det=document.get
 // ── View ──
 function setView(v){
   currentView=v;
-  ['list','cal','medien'].forEach(x=>{
-    const btn=document.getElementById('btn-'+x);
-    if(btn)btn.classList.toggle('active',v===x);
-  });
+  ['list','cal','medien'].forEach(x=>{const btn=document.getElementById('btn-'+x);if(btn)btn.classList.toggle('active',v===x);});
   document.getElementById('list-wrap').style.display=v==='list'?'':'none';
   document.getElementById('cal-wrap').classList.toggle('show',v==='cal');
   document.getElementById('medien-wrap').classList.toggle('show',v==='medien');
-  // Hide themen-board group when in medien view
   const themenGroup=document.getElementById('themen-group');
   const themenGroupWrap=themenGroup?themenGroup.closest('.board-group'):null;
   if(themenGroupWrap)themenGroupWrap.style.display=v==='medien'?'none':'';
   if(v==='cal')renderCal();
-  if(v==='medien'){updateMedTagFilter();renderMedien();}
+  if(v==='medien'){renderMedien();}
 }
 
 // ── Mobile nav ──
@@ -1487,140 +1272,215 @@ document.getElementById('add-btn').addEventListener('click',()=>addItem());
 document.getElementById('text-inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();addItem();return;}if(e.key==='Escape'){hideDatePicker();document.getElementById('mention-drop').classList.remove('show');}});
 document.getElementById('text-inp').addEventListener('input',e=>{const ta=e.target;const val=ta.value;const pos=ta.selectionStart;const bc=val.slice(0,pos);if(bc.endsWith('//')){showDatePicker();return;}hideDatePicker();updateMentionDrop(val,pos);updateInpTip(val);});
 document.getElementById('setup-inp').addEventListener('keydown',e=>{if(e.key==='Enter')saveMyName();});
+document.addEventListener('click',e=>{if(!document.getElementById('hdr-title-wrap').contains(e.target))closeHdrDD();});
 
-// ── Medien Sidebar ──
+
+const MED_MNS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const MED_DWS=['Mo','Di','Mi','Do','Fr'];
+const MED_FT={'01.01':'Neujahr','06.01':'Hl. Drei Könige','01.05':'Staatsfeiertag','15.08':'Mariä Himmelfahrt','26.10':'Nationalfeiertag','01.11':'Allerheiligen','08.12':'Mariä Empfängnis','25.12':'Christtag','26.12':'Stephanitag'};
+const MED_BW={'03.04.2026':'Karfreitag','06.04.2026':'Ostermontag','14.05.2026':'Christi Himmelfahrt','25.05.2026':'Pfingstmontag','04.06.2026':'Fronleichnam'};
+function medPD(s){const p=s.split('.');return new Date(+p[2],+p[1]-1,+p[0]);}
+function medSD(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
+function medFK(d){return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0');}
+function medFKF(d){return medFK(d)+'.'+d.getFullYear();}
+function medGH(d){return MED_FT[medFK(d)]||MED_BW[medFKF(d)]||null;}
+function medGAZ(d){
+  const az=[];
+  DIWI.forEach(x=>{if(medSD(medPD(x.az),d))az.push('AZ DIWI #'+x.nr);});
+  THEMA_VBG.forEach(x=>{if(x.az&&medSD(medPD(x.az),d))az.push('AZ Thema VBG');});
+  return az;
+}
+function medGPL(d,kid){return medienPlanung.filter(p=>p.datum&&medSD(medPD(p.datum),d)&&(!kid||p.kanal===kid));}
+function medGKW(d){const j=new Date(d.getFullYear(),0,4);const s=new Date(j);s.setDate(j.getDate()-(j.getDay()||7)+1);return Math.round((d-s)/604800000)+1;}
+function medMonStart(d){const ws=new Date(d);const dow=ws.getDay()-1<0?6:ws.getDay()-1;ws.setDate(ws.getDate()-dow);return ws;}
+
+let medView='mo';
+let medCY,medCM,medWeekStart;
+(()=>{const n=new Date();medCY=n.getFullYear();medCM=n.getMonth();medWeekStart=medMonStart(new Date(n));})();
+let medSelDay=null,medSelWi=null;
+
+function medNavPeriod(d){
+  if(d===0){const n=new Date();medCY=n.getFullYear();medCM=n.getMonth();medWeekStart=medMonStart(new Date(n));}
+  else if(medView==='mo'){medCM+=d;if(medCM>11){medCM=0;medCY++;}else if(medCM<0){medCM=11;medCY--;}}
+  else{medWeekStart=new Date(medWeekStart);medWeekStart.setDate(medWeekStart.getDate()+d*7);}
+  medSelDay=null;medSelWi=null;renderMedien();
+}
+function setMedView(v){
+  medView=v;
+  const bmo=document.getElementById('med-btn-mo');const bkw=document.getElementById('med-btn-kw');
+  if(bmo)bmo.classList.toggle('active',v==='mo');
+  if(bkw)bkw.classList.toggle('active',v==='kw');
+  medSelDay=null;medSelWi=null;renderMedien();
+}
+function medClickDay(ds,wid){
+  if(medSelDay===ds){medSelDay=null;medSelWi=null;}else{medSelDay=ds;medSelWi=wid;}
+  medUpdateDetails();
+}
+function medUpdateDetails(){
+  document.querySelectorAll('.med-detpanel').forEach(p=>p.classList.remove('open'));
+  document.querySelectorAll('[data-mday]').forEach(el=>el.classList.remove('sel'));
+  if(!medSelDay)return;
+  const d=medPD(medSelDay);
+  const panel=document.getElementById('med-dp'+medSelWi);if(!panel)return;
+  const az=medGAZ(d),pls=medGPL(d);
+  const dn=d.toLocaleDateString('de-AT',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  let html=`<div class="med-det-date">${esc(dn)}</div>`;
+  az.forEach(a=>html+=`<div class="med-det-item"><div class="med-det-dot" style="background:var(--handoff-c)"></div><div><div class="med-det-az">&#9888; ${esc(a)}</div></div></div>`);
+  pls.forEach(p=>{
+    const k=KANALE.find(k=>k.id===p.kanal)||{name:p.kanal,color:'#888'};
+    const tc=p.tag?tCol(p.tag):{bg:'#888',tx:'#fff'};
+    html+=`<div class="med-det-item"><div class="med-det-dot" style="background:${k.color}"></div><div style="flex:1;min-width:0"><div class="med-det-med">${esc(k.name)}${p.tag?`<span class="med-det-tag" style="background:${k.color}">#${esc(p.tag)}</span>`:''}</div><div class="med-det-ti">${esc(p.titel||'')}</div><div class="med-det-per">${esc(p.person||'')}</div></div><button class="del-btn" onclick="delMed('${p.id||''}')" style="flex-shrink:0">&#215;</button></div></div>`;
+  });
+  if(!az.length&&!pls.length)html+=`<div style="font-size:12px;color:var(--text3);font-style:italic">Keine Eintr&#228;ge an diesem Tag</div>`;
+  panel.innerHTML=html;panel.classList.add('open');
+  document.querySelectorAll(`[data-mday="${medSelDay}"]`).forEach(el=>el.classList.add('sel'));
+}
+function medBuildDayHdr(d,di,inM,wi){
+  const today=new Date();today.setHours(0,0,0,0);
+  const isT=medSD(d,today),hol=medGH(d),az=medGAZ(d),hasc=(medGPL(d).length>0||az.length>0)&&inM,ds=medFKF(d),isSel=medSelDay===ds;
+  let cls='med-dhdr';if(isT)cls+=' istod';else if(hol&&inM)cls+=' hol';else if(hasc)cls+=' hasc';if(isSel)cls+=' sel';
+  let h=`<div class="${cls}" ${inM&&!hol?`onclick="medClickDay('${ds}',${wi})" data-mday="${ds}"`:''}>`;
+  if(inM){h+=`<span class="med-dow">${MED_DWS[di]}</span><span class="med-dnum">${d.getDate()}</span>`;if(hol)h+=`<span class="med-holn">${esc(hol)}</span>`;az.forEach(a=>h+=`<span class="med-azchip">${esc(a)}</span>`);}
+  return h+`</div>`;
+}
+function medBuildWeek(wd,wi,inMCheck){
+  const today=new Date();today.setHours(0,0,0,0);
+  const kw=medGKW(wd[0]);
+  const aktK=KANALE.filter(k=>wd.some(d=>medGPL(d,k.id).length>0));
+  let h=`<div class="med-wblock"><div class="med-whdr"><div class="med-kwlbl">KW&nbsp;${kw}</div>`;
+  wd.forEach((d,di)=>h+=medBuildDayHdr(d,di,inMCheck(d),wi));
+  h+=`</div><div class="med-wbody">`;
+  if(!aktK.length){h+=`<div class="med-norow">Keine Platzierungen diese Woche</div>`;}
+  else{aktK.forEach(k=>{
+    if(medView==='mo'){
+      h+=`<div class="med-mlbl"><div class="med-mdot" style="background:${k.color}"></div>${esc(k.name)}</div>`;
+      wd.forEach(d=>{
+        const inM=inMCheck(d),isT=medSD(d,today),pls=medGPL(d,k.id),ds=medFKF(d),isSel=medSelDay===ds;
+        let cls='med-cell';if(!inM)cls+=' out';else if(isSel)cls+=' sel';else if(isT)cls+=' tod';
+        h+=`<div class="${cls}" ${inM?`onclick="medClickDay('${ds}',${wi})" data-mday="${ds}"`:''}>`;
+        h+=`<div class="med-chips">`;pls.forEach(p=>h+=`<span class="med-chip" style="background:${k.color}">#${esc(p.tag||'')}</span>`);h+=`</div></div>`;
+      });
+    } else {
+      h+=`<div class="med-mlbl"><div class="med-mdot" style="background:${k.color}"></div>${esc(k.name)}</div>`;
+      wd.forEach(d=>{
+        const inM=inMCheck(d),isT=medSD(d,today),pls=medGPL(d,k.id),ds=medFKF(d),isSel=medSelDay===ds;
+        let cls='med-cell-wk';if(!inM)cls+=' out';else if(isSel)cls+=' sel';else if(isT)cls+=' tod';
+        h+=`<div class="${cls}" ${inM?`onclick="medClickDay('${ds}',${wi})" data-mday="${ds}"`:''}>`;
+        pls.forEach(p=>h+=`<span class="med-chip-wk" style="background:${k.color}">#${esc(p.tag||'')} ${esc(p.titel||'')}</span>`);h+=`</div>`;
+      });
+    }
+  });}
+  h+=`</div><div class="med-detpanel" id="med-dp${wi}"></div></div>`;
+  return h;
+}
+function renderMedien(){
+  const board=document.getElementById('med-board');if(!board)return;
+  board.innerHTML='';
+  const lbl=document.getElementById('med-period-lbl');
+  if(medView==='mo'){
+    if(lbl)lbl.textContent=MED_MNS[medCM]+' '+medCY;
+    const first=new Date(medCY,medCM,1),last=new Date(medCY,medCM+1,0);
+    let cur=new Date(first);let sdw=cur.getDay()-1;if(sdw<0)sdw=6;cur.setDate(cur.getDate()-sdw);
+    let wi=0;
+    while(cur<=last){
+      const wd=[];for(let i=0;i<5;i++){wd.push(new Date(cur));cur.setDate(cur.getDate()+1);}cur.setDate(cur.getDate()+2);
+      if(!wd.some(d=>d.getMonth()===medCM)){wi++;continue;}
+      board.innerHTML+=medBuildWeek(wd,wi,d=>d.getMonth()===medCM);wi++;
+    }
+  } else {
+    const we=new Date(medWeekStart);we.setDate(medWeekStart.getDate()+4);
+    const kw=medGKW(medWeekStart);
+    if(lbl)lbl.textContent='KW '+kw+' · '+medWeekStart.toLocaleDateString('de-AT',{day:'2-digit',month:'2-digit'})+' – '+we.toLocaleDateString('de-AT',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const wd=[];for(let i=0;i<5;i++){const d=new Date(medWeekStart);d.setDate(medWeekStart.getDate()+i);wd.push(d);}
+    board.innerHTML=medBuildWeek(wd,0,()=>true);
+  }
+  if(medSelDay&&medSelWi!==null)medUpdateDetails();
+}
+
+function delMed(id){
+  if(id){const idx=medienPlanung.findIndex(p=>p.id===id);if(idx>=0)medienPlanung.splice(idx,1);}
+  saveMedien();medSelDay=null;medSelWi=null;renderMedien();renderMedienSidebar();
+}
+function toggleMedKanal(id){medKanalFilter=(medKanalFilter===id)?null:id;renderMedien();}
+function updateMedTagFilter(){
+  const sel=document.getElementById('medm-tag');if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">Kein Tag</option>'+getAllTags().map(t=>`<option value="${esc(t)}"${t===cur?' selected':''}>${esc(t)}</option>`).join('');
+}
+function openMedM(diwiNr,tvDatum){
+  const sel=document.getElementById('medm-kanal');if(!sel)return;
+  sel.innerHTML=KANALE.map(k=>`<option value="${k.id}">${esc(k.name)}</option>`).join('');
+  if(diwiNr){sel.value='diwi';const d=DIWI.find(d=>d.nr===diwiNr);if(d){document.getElementById('medm-datum').value=d.datum;document.getElementById('medm-diwi-hint').style.display='block';document.getElementById('medm-diwi-hint').textContent=`DIWI #${d.nr}: ${d.thema} · AZ: ${d.az}`;}}
+  else if(tvDatum){sel.value='thema_vbg';document.getElementById('medm-datum').value=tvDatum;document.getElementById('medm-diwi-hint').style.display='none';}
+  else{document.getElementById('medm-datum').value='';document.getElementById('medm-diwi-hint').style.display='none';}
+  updateMedTagFilter();
+  const pSel=document.getElementById('medm-person');if(pSel)pSel.innerHTML='<option value="">Keine Person</option>'+window._teamList.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  document.getElementById('medm-titel').value='';
+  document.getElementById('medm-status').value='geplant';
+  document.getElementById('medm-create-task').checked=true;
+  document.getElementById('medm-modal').classList.add('show');
+}
+function openMedMDiwi(nr){openMedM(nr,null);}
+function openMedMTV(datum){openMedM(null,datum);}
+function closeMedM(){document.getElementById('medm-modal').classList.remove('show');}
+function confirmMedM(){
+  const kanal=document.getElementById('medm-kanal').value;
+  const datum=document.getElementById('medm-datum').value.trim();
+  const titel=document.getElementById('medm-titel').value.trim();
+  const tag=document.getElementById('medm-tag').value;
+  const person=document.getElementById('medm-person').value;
+  if(!kanal||!datum)return;
+  const k=KANALE.find(k=>k.id===kanal);
+  let diwiNr=null;
+  if(kanal==='diwi'){const d=DIWI.find(d=>d.datum===datum);if(d)diwiNr=d.nr;}
+  const entry={id:Date.now().toString(),kanal,datum,titel,tag,person,diwiNr,ts:Date.now()};
+  medienPlanung.push(entry);saveMedien();
+  if(document.getElementById('medm-create-task').checked){
+    const kName=k?k.name:kanal;
+    let taskText=diwiNr?`DIWI #${diwiNr}`:kanal==='thema_vbg'?`Thema Vorarlberg ${datum}`:kName;
+    if(titel)taskText+=`: ${titel}`;
+    let dl=null;
+    if(diwiNr){const d=DIWI.find(d=>d.nr===diwiNr);if(d){const az=d.az.split('.');dl=new Date(parseInt(az[2].length===2?'20'+az[2]:az[2]),parseInt(az[1])-1,parseInt(az[0]));}}
+    const item={id:Date.now().toString(),types:['todo'],text:taskText,person:person||'',persons:[],deadline:dl?dl.toISOString():null,tags:tag?[tag]:[],done:false,ts:Date.now(),_medienLink:kName};
+    items.unshift(item);save();render();
+  }
+  closeMedM();renderMedien();renderMedienSidebar();
+}
+
 function renderMedienSidebar(){
   const today=new Date();today.setHours(0,0,0,0);
-  const weekStart=new Date(today);const dow=today.getDay()===0?6:today.getDay()-1;weekStart.setDate(today.getDate()-dow);
-  const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+13); // 2 weeks ahead
-  // Stats
-  const thisWeek=medienPlanung.filter(p=>{if(!p.datum)return false;const parts=p.datum.split('.');if(parts.length<3)return false;const d=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));return d>=weekStart&&d<=weekEnd;});
-  const eingereicht=medienPlanung.filter(p=>p.status==='eingereicht').length;
-  const geplant=medienPlanung.filter(p=>p.status==='geplant').length;
+  const weekEnd=new Date(today);weekEnd.setDate(today.getDate()+14);
   const cntEl=document.getElementById('med-sb-cnt');if(cntEl)cntEl.textContent=medienPlanung.length;
+  const thisWeek=medienPlanung.filter(p=>{if(!p.datum)return false;const parts=p.datum.split('.');if(parts.length<3)return false;const d=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));return d>=today&&d<=weekEnd;});
   const wEl=document.getElementById('med-sb-week');if(wEl)wEl.textContent=thisWeek.length;
-  const eEl=document.getElementById('med-sb-eingereicht');if(eEl)eEl.textContent=eingereicht;
-  const gEl=document.getElementById('med-sb-geplant');if(gEl)gEl.textContent=geplant;
-  // Week label
+  const eEl=document.getElementById('med-sb-eingereicht');if(eEl)eEl.textContent=medienPlanung.filter(p=>p.status==='eingereicht').length;
+  const gEl=document.getElementById('med-sb-geplant');if(gEl)gEl.textContent=medienPlanung.filter(p=>p.status==='geplant').length;
   const lbl=document.getElementById('med-sb-week-lbl');
-  if(lbl)lbl.textContent=`${weekStart.toLocaleDateString('de-AT',{day:'2-digit',month:'2-digit'})} – ${weekEnd.toLocaleDateString('de-AT',{day:'2-digit',month:'2-digit'})}`;
-  // Entries
+  if(lbl)lbl.textContent=today.toLocaleDateString('de-AT',{day:'2-digit',month:'2-digit'})+' – '+weekEnd.toLocaleDateString('de-AT',{day:'2-digit',month:'2-digit'});
   const entriesEl=document.getElementById('med-sb-entries');if(!entriesEl)return;
-  // Also show upcoming DIWI/TV dates even if no planung entry
   const upcomingFixed=[];
-  DIWI.filter(d=>{const parts=d.datum.split('.');const dt=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));return dt>=weekStart&&dt<=weekEnd;}).forEach(d=>{upcomingFixed.push({type:'diwi',label:`DIWI #${d.nr}`,sub:d.thema.slice(0,28)+(d.thema.length>28?'…':''),datum:d.datum,az:d.az,color:'#C08020',kanal:'diwi'});});
-  THEMA_VBG.filter(t=>{const parts=t.datum.split('.');const dt=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));return dt>=weekStart&&dt<=weekEnd;}).forEach(t=>{upcomingFixed.push({type:'tv',label:'Thema Vorarlberg',sub:t.thema.slice(0,28)+(t.thema.length>28?'…':''),datum:t.datum,color:'#D4537E',kanal:'thema_vbg'});});
-  // Planung entries this period
-  const planEntries=thisWeek.map(p=>{const k=KANALE.find(k=>k.id===p.kanal)||{color:'#888',name:p.kanal};return{type:'plan',label:k.name+(p.diwiNr?` #${p.diwiNr}`:''),sub:p.titel||p.tag||'',datum:p.datum,color:k.color,kanal:p.kanal,status:p.status};});
+  DIWI.filter(d=>{const parts=d.datum.split('.');const dt=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));return dt>=today&&dt<=weekEnd;}).forEach(d=>{upcomingFixed.push({kanal:'diwi',label:`DIWI #${d.nr}`,sub:d.thema.slice(0,28),datum:d.datum,az:d.az,color:'#C08020'});});
+  THEMA_VBG.filter(t=>{const parts=t.datum.split('.');const dt=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));return dt>=today&&dt<=weekEnd;}).forEach(t=>{upcomingFixed.push({kanal:'thema_vbg',label:'Thema Vorarlberg',sub:t.thema.slice(0,28),datum:t.datum,color:'#D4537E'});});
+  const planEntries=thisWeek.map(p=>{const k=KANALE.find(k=>k.id===p.kanal)||{color:'#888',name:p.kanal};return{kanal:p.kanal,label:k.name+(p.diwiNr?` #${p.diwiNr}`:''),sub:p.titel||p.tag||'',datum:p.datum,color:k.color};});
   const allEntries=[...upcomingFixed,...planEntries].sort((a,b)=>{const da=a.datum.split('.').reverse().join('-');const db=b.datum.split('.').reverse().join('-');return da.localeCompare(db);});
-  if(!allEntries.length){entriesEl.innerHTML=`<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px 4px;font-style:italic">Keine Einträge diese Woche</div>`;return;}
+  if(!allEntries.length){entriesEl.innerHTML=`<div style="font-size:12px;color:var(--text3);text-align:center;padding:8px 4px;font-style:italic">Keine Eintr&#228;ge</div>`;return;}
   entriesEl.innerHTML=allEntries.slice(0,5).map(e=>{
-    const today2=new Date();today2.setHours(0,0,0,0);
     let azBadge='';
-    if(e.az){const azParts=e.az.split('.');const azD=new Date(parseInt('20'+azParts[2]),parseInt(azParts[1])-1,parseInt(azParts[0]));const diff=Math.round((azD-today2)/86400000);if(diff<0)azBadge=`<span style="font-size:10px;font-weight:600;padding:1px 5px;border-radius:4px;background:#FDEAEA;color:#A03040;white-space:nowrap">AZ überfällig</span>`;else if(diff<=3)azBadge=`<span style="font-size:10px;font-weight:600;padding:1px 5px;border-radius:4px;background:#FDEAEA;color:#A03040;white-space:nowrap">AZ ${e.az}</span>`;else if(diff<=7)azBadge=`<span style="font-size:10px;font-weight:600;padding:1px 5px;border-radius:4px;background:#FFF8DC;color:#8A5A00;white-space:nowrap">AZ ${e.az}</span>`;}
-    const statusBadge=e.status?`<span style="font-size:10px;font-weight:600;padding:1px 5px;border-radius:4px;white-space:nowrap;background:${e.status==='erschienen'?'#DDF6F2':e.status==='eingereicht'?'#FFF8DC':'#EDE9FB'};color:${e.status==='erschienen'?'#1A6B62':e.status==='eingereicht'?'#8A5A00':'#4A3A9A'}">${e.status}</span>`:'';
-    return`<div onclick="openMedienKanal('${e.kanal}')" style="display:flex;align-items:flex-start;gap:6px;padding:5px 4px;border-radius:6px;margin-bottom:3px;background:var(--surface);border:0.5px solid var(--border);cursor:pointer;transition:background .1s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='var(--surface)'">
+    if(e.az){const azP=e.az.split('.');const azD=new Date(parseInt('20'+azP[2]),parseInt(azP[1])-1,parseInt(azP[0]));const diff=Math.round((azD-today)/86400000);if(diff<0)azBadge=`<span style="font-size:10px;background:var(--handoff-bg);color:var(--handoff-c);padding:1px 5px;border-radius:3px;white-space:nowrap">AZ vorbei</span>`;else if(diff<=3)azBadge=`<span style="font-size:10px;background:var(--handoff-bg);color:var(--handoff-c);padding:1px 5px;border-radius:3px;white-space:nowrap">AZ ${e.az}</span>`;else if(diff<=7)azBadge=`<span style="font-size:10px;background:var(--recur-bg);color:var(--recur-c);padding:1px 5px;border-radius:3px;white-space:nowrap">AZ ${e.az}</span>`;}
+    return`<div onclick="openMedienKanal('${e.kanal}')" style="display:flex;align-items:flex-start;gap:6px;padding:5px 4px;border-radius:6px;margin-bottom:3px;background:var(--surface);border:1px solid var(--border);cursor:pointer" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='var(--surface)'">
       <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;background:${e.color}"></div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:12px;font-weight:500;color:var(--text);line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e.label)}</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:1px">${esc(e.datum)}${e.sub?' · '+esc(e.sub):''}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:2px;align-items:flex-end">${azBadge}${statusBadge}</div>
+      <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.label)}</div><div style="font-size:11px;color:var(--text3);margin-top:1px">${esc(e.datum)}${e.sub?' · '+esc(e.sub):''}</div></div>
+      <div style="display:flex;flex-direction:column;gap:2px;align-items:flex-end">${azBadge}</div>
     </div>`;
   }).join('');
 }
+function openMedienKanal(kanalId){medKanalFilter=kanalId;setView('medien');}
 
-function openMedienKanal(kanalId){
-  medKanalFilter=kanalId;
-  setView('medien');
-  renderMedien();
-}
-let dragSrcId=null;
-function onDragStart(e,id){dragSrcId=id;e.dataTransfer.effectAllowed='move';setTimeout(()=>{const el=document.querySelector(`[data-id="${id}"]`);if(el)el.classList.add('dragging');},0);}
-function onDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';const el=e.currentTarget;el.classList.add('drag-over-top');}
-function onDragLeave(e){e.currentTarget.classList.remove('drag-over-top');}
-function onDrop(e,targetId){
-  e.preventDefault();
-  e.currentTarget.classList.remove('drag-over-top');
-  document.querySelectorAll('.item').forEach(el=>{el.classList.remove('dragging','drag-over-top');});
-  if(!dragSrcId||dragSrcId===targetId)return;
-  const srcIdx=items.findIndex(i=>i.id===dragSrcId);
-  const tgtIdx=items.findIndex(i=>i.id===targetId);
-  if(srcIdx<0||tgtIdx<0)return;
-  const [moved]=items.splice(srcIdx,1);
-  items.splice(tgtIdx,0,moved);
-  save();render();dragSrcId=null;
-}
-
-// ── Format item text: newlines → bullet list ──
-function fmtText(text){
-  const lines=text.split('\n').filter(l=>l.trim());
-  if(lines.length<=1)return esc(text);
-  return '<ul style="margin:2px 0 0 14px;padding:0;list-style:disc">'+lines.map(l=>`<li style="margin-bottom:2px">${esc(l.replace(/^[-•*]\s*/,''))}</li>`).join('')+'</ul>';
-}
-function toggleItemTag(id,tag){
-  const it=items.find(i=>i.id===id);if(!it)return;
-  if(!it.tags)it.tags=[];
-  if(it.tags.includes(tag))it.tags=it.tags.filter(t=>t!==tag);
-  else it.tags.push(tag);
-  save();render();
-}
-function toggleEditTag(id,tag){
-  const it=items.find(i=>i.id===id);if(!it)return;
-  if(!it.tags)it.tags=[];
-  if(it.tags.includes(tag))it.tags=it.tags.filter(t=>t!==tag);
-  else it.tags.push(tag);
-  save();
-  // Re-render just the tag strip in edit mode without losing focus
-  const strip=document.querySelector(`[data-id="${id}"] .edit-tag-strip`);
-  if(strip){strip.innerHTML=getAllTags().map(t=>{const tc=tCol(t);const active=(it.tags||[]).includes(t);const style=active?`background:${tc.bg};color:${tc.tx};border-color:${tc.tx}`:'';return`<span class="edit-tag-btn${active?' active':''}" style="${style}" onclick="toggleEditTag('${id}','${esc(t)}')">#${esc(t)}</span>`;}).join('');}
-}
-
-// ── @ mention + # tag support in edit textarea ──
-let editMentionAnchor=-1;
-function setupEditTA(id){
-  const ta=document.getElementById('edit-'+id);if(!ta)return;
-  ta.addEventListener('input',()=>{
-    const val=ta.value;const pos=ta.selectionStart;const bc=val.slice(0,pos);
-    const atM=bc.match(/@([A-Za-zÄÖÜäöüß]*)$/);
-    const hashM=bc.match(/#([A-Za-zÄÖÜäöüß0-9]*)$/);
-    // Remove old inline hints
-    let hint=ta.parentNode.querySelector('.edit-inline-drop');
-    if(!hint){hint=document.createElement('div');hint.className='edit-inline-drop ac-list';hint.style.cssText='position:relative;z-index:60;margin-bottom:3px';ta.parentNode.insertBefore(hint,ta);}
-    if(atM){
-      editMentionAnchor=bc.lastIndexOf('@');
-      const frag=atM[1].toLowerCase();
-      const sugg=window._teamList.filter(t=>!frag||t.toLowerCase().split(' ').some(p=>p.startsWith(frag))||t.toLowerCase().startsWith(frag)).slice(0,5);
-      if(sugg.length){hint.innerHTML=sugg.map(n=>{const c=pCol(n);return`<div class="ac-item" onmousedown="insertEditMention('${id}','${esc(n)}')"><div class="ac-av" style="background:${c.av};color:#fff">${esc(ini(n))}</div>${esc(n)}</div>`;}).join('');hint.style.display='block';return;}
-    } else if(hashM){
-      const frag=hashM[1].toUpperCase();
-      const sugg=getAllTags().filter(t=>!frag||t.startsWith(frag)).slice(0,6);
-      if(sugg.length){hint.innerHTML=sugg.map(t=>{const tc=tCol(t);return`<div class="ac-item" onmousedown="insertEditHash('${id}','${esc(t)}')"><span style="font-size:11px;font-weight:700;padding:1px 5px;border-radius:5px;background:${tc.bg};color:${tc.tx}">#${esc(t)}</span></div>`;}).join('');hint.style.display='block';return;}
-    }
-    hint.style.display='none';
-  });
-  ta.addEventListener('blur',()=>{setTimeout(()=>{const hint=ta.parentNode.querySelector('.edit-inline-drop');if(hint)hint.style.display='none';},150);});
-}
-function insertEditMention(id,name){
-  const ta=document.getElementById('edit-'+id);if(!ta)return;
-  const val=ta.value;const before=val.slice(0,editMentionAnchor);const after=val.slice(ta.selectionEnd||editMentionAnchor);
-  ta.value=before+'@'+name.split(' ')[0]+' '+after.replace(/^[A-Za-zÄÖÜäöüß]*/,'');
-  const hint=ta.parentNode.querySelector('.edit-inline-drop');if(hint)hint.style.display='none';
-  ta.focus();
-}
-function insertEditHash(id,tag){
-  const ta=document.getElementById('edit-'+id);if(!ta)return;
-  const val=ta.value;const pos=ta.selectionStart;const bc=val.slice(0,pos);
-  const hashStart=bc.lastIndexOf('#');
-  const before=val.slice(0,hashStart);const after=val.slice(pos);
-  ta.value=before+'#'+tag+' '+after;
-  const hint=ta.parentNode.querySelector('.edit-inline-drop');if(hint)hint.style.display='none';
-  // Also add to tags
-  const it=items.find(i=>i.id===id);if(it){if(!it.tags)it.tags=[];if(!it.tags.includes(tag))it.tags.push(tag);}
-  ta.focus();
-}
-
-// ── Expose to window ──
+window.openMedienKanal=openMedienKanal;window.renderMedienSidebar=renderMedienSidebar;
+window.renderMedien=renderMedien;window.setMedView=setMedView;window.medNavPeriod=medNavPeriod;
+window.medClickDay=medClickDay;window.delMed=delMed;window.toggleMedKanal=toggleMedKanal;
+window.openMedM=openMedM;window.openMedMDiwi=openMedMDiwi;window.openMedMTV=openMedMTV;
+window.closeMedM=closeMedM;window.confirmMedM=confirmMedM;
 window.saveMyName=saveMyName;window.toggle=toggle;window.del=del;window.startEdit=startEdit;window.saveEdit=saveEdit;window.cancelEdit=cancelEdit;
 window.setFilter=setFilter;window.setTagFilter=setTagFilter;window.setView=setView;window.mobNav=mobNav;
 window.togglePF=togglePF;window.clearPF=clearPF;window.toggleSB=toggleSB;
@@ -1633,15 +1493,14 @@ window.openTM=openTM;window.closeTM=closeTM;window.confirmTM=confirmTM;
 window.openPM=openPM;window.closePM=closePM;window.confirmPM=confirmPM;window.clearPM=clearPM;
 window.openAPM=openAPM;window.closeAPM=closeAPM;window.confirmAPM=confirmAPM;
 window.openATM=openATM;window.closeATM=closeATM;window.confirmATM=confirmATM;
-window.openMedM=openMedM;window.openMedMDiwi=openMedMDiwi;window.openMedMTV=openMedMTV;window.closeMedM=closeMedM;window.confirmMedM=confirmMedM;
-window.toggleMedKanal=toggleMedKanal;window.delMed=delMed;window.renderMedien=renderMedien;
 window.calMv=calMv;window.calToday=calToday;window.calSelDay=calSelDay;window.chartMv=chartMv;window.runAI=runAI;
-window.smartPerson=smartPerson;window.smartSkip=smartSkip;window.sAC=sAC;
 window.toggleEditTag=toggleEditTag;window.insertEditMention=insertEditMention;window.insertEditHash=insertEditHash;
 window.onDragStart=onDragStart;window.onDragOver=onDragOver;window.onDragLeave=onDragLeave;window.onDrop=onDrop;
-function toggleMedTable(bodyId,chevId){const b=document.getElementById(bodyId);const c=document.getElementById(chevId);if(!b)return;const open=b.style.display==='none';b.style.display=open?'block':'none';if(c)c.style.transform=open?'rotate(180deg)':'';}
-window.openMedienKanal=openMedienKanal;window.renderMedienSidebar=renderMedienSidebar;
-window.toggleMedTable=toggleMedTable;
+window.toggleItemTag=toggleItemTag;
+window.toggleBoardGroup=toggleBoardGroup;
+window.toggleHdrDD=toggleHdrDD;window.closeHdrDD=closeHdrDD;window.scrollToSB=scrollToSB;
+window.toggleDatenschutz=toggleDatenschutz;
+window.smartPerson=smartPerson;window.smartSkip=smartSkip;window.sAC=sAC;
 window.toggleItemTag=toggleItemTag;
 window.toggleBoardGroup=toggleBoardGroup;
 window.toggleHdrDD=toggleHdrDD;window.closeHdrDD=closeHdrDD;window.scrollToSB=scrollToSB;
@@ -1650,8 +1509,8 @@ window.toggleDatenschutz=toggleDatenschutz;
 // ── Firebase listeners ──
 function migrate(){const l=localStorage.getItem('dashboard_v6')||localStorage.getItem('dashboard_v7');if(l){try{const li=JSON.parse(l);if(li.length>0&&items.length===0){items=li;save();}}catch(e){}}}
 onValue(teamRef,snap=>{const data=snap.val();if(data&&data.names){window._teamList=[...new Set([...DEFAULT_TEAM,...data.names])];if(data.colors)window._teamColors={...COLOR_OV,...data.colors};Object.keys(cCache).forEach(k=>{delete cCache[k];});renderPersonSB();}});
-onValue(tagsRef,snap=>{const data=snap.val();if(data&&Array.isArray(data)){customTags=data;renderTagStrip();renderTagSB();updateMedTagFilter();}});
 onValue(medienRef,snap=>{const data=snap.val();medienPlanung=data?(Array.isArray(data)?data:Object.values(data)):[];renderMedienSidebar();if(currentView==='medien')renderMedien();});
+onValue(tagsRef,snap=>{const data=snap.val();if(data&&Array.isArray(data)){customTags=data;renderTagStrip();renderTagSB();updateMedTagFilter();}});
 onValue(itemsRef,snap=>{const data=snap.val();items=data?(Array.isArray(data)?data:Object.values(data)):[];if(!_fbReady){_fbReady=true;migrate();let ch=false;items.forEach(it=>{if(it.person&&['jennifer','jennifer grabher'].includes(it.person.trim().toLowerCase())){it.person='Jennifer Grabher';ch=true;}});if(ch)save();}setSS('ok');render();});
 onValue(myNameRef,snap=>{const v=snap.val();if(v&&!myName){myName=v;localStorage.setItem(STORE_ME,myName);}});
 
