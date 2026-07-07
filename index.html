@@ -777,7 +777,7 @@ function insertMention(name){const ta=document.getElementById('text-inp');const 
 function updateInpTip(val){const types=detectTypes(val);const dl=dDL(val.replace(/\/\/\d{1,2}\.\d{1,2}\.\d{4}/,''));const tags=dTags(val);const ment=detectMentions(val);types.forEach(t=>setActiveType(t,true));const parts=[];if(types.length)parts.push(types.map(t=>({todo:'To-do',handoff:'Übergabe',watch:'Beobachten',idea:'Idee'}[t]||t)).join('+')+' erkannt');if(ment.length)parts.push(ment.map(m=>m.split(' ')[0]).join(', ')+' erkannt');if(dl)parts.push('📅 '+fmtDL(dl));if(tags.length)parts.push(tags.map(t=>'#'+t).join(' '));document.getElementById('inp-tip').textContent=parts.join(' · ');}
 
 // ── Header dropdown ──
-function toggleHdrDD(){const dd=document.getElementById('hdr-dropdown');const arr=document.getElementById('hdr-dd-arrow');dd.classList.toggle('show');arr.classList.toggle('open');}
+function toggleHdrDD(){const dd=document.getElementById('hdr-dropdown');const arr=document.getElementById('hdr-dd-arrow');if(dd)dd.classList.toggle('show');if(arr)arr.classList.toggle('open');}
 function closeHdrDD(){const dd=document.getElementById('hdr-dropdown');if(dd)dd.classList.remove('show');const arr=document.getElementById('hdr-dd-arrow');if(arr)arr.classList.remove('open');}
 document.addEventListener('click',e=>{if(!document.getElementById('hdr-title-wrap').contains(e.target))closeHdrDD();});
 function scrollToSB(id){const el=document.getElementById('sb-hdr-'+id.replace('sb-',''));if(el){el.scrollIntoView({behavior:'smooth',block:'start'});const body=document.getElementById(id);const chev=document.getElementById('chev-'+id);if(body&&!body.classList.contains('open')){body.classList.add('open');if(chev)chev.classList.add('open');}}}
@@ -983,7 +983,7 @@ function calMv(d){calM+=d;if(calM>11){calM=0;calY++;}else if(calM<0){calM=11;cal
 function calToday(){const n=new Date();calY=n.getFullYear();calM=n.getMonth();renderCal();}
 function itemsOnDay(y,m,d){return items.filter(it=>{if(!it.deadline)return false;const dl=new Date(it.deadline);return dl.getFullYear()===y&&dl.getMonth()===m&&dl.getDate()===d;});}
 function calSelDay(y,m,d){calSel=[y,m,d];renderCalDet(y,m,d);}
-function renderCal(){document.getElementById('cal-mo-lbl').textContent=CAL_MN[calM]+' '+calY;const grid=document.getElementById('cal-grid');const today=new Date();today.setHours(0,0,0,0);let html=DOW.map(d=>`<div class="cal-dow">${d}</div>`).join('');const first=new Date(calY,calM,1);let sdow=first.getDay()-1;if(sdow<0)sdow=6;const dim=new Date(calY,calM+1,0).getDate();const dimp=new Date(calY,calM,0).getDate();for(let cell=0;cell<42;cell++){let day,mo,yr,other=false;if(cell<sdow){day=dimp-sdow+cell+1;mo=calM-1;yr=calY;if(mo<0){mo=11;yr--;}other=true;}else if(cell-sdow>=dim){day=cell-sdow-dim+1;mo=calM+1;yr=calY;if(mo>11){mo=0;yr++;}other=true;}else{day=cell-sdow+1;mo=calM;yr=calY;}const isT=(yr===today.getFullYear()&&mo===today.getMonth()&&day===today.getDate());const hits=itemsOnDay(yr,mo,day);const pt=(it)=>(it.types||[it.type])[0];const dots=hits.slice(0,2).map(it=>{const tc=TC[pt(it)]||{bg:'#F2F0F7',c:'#6B6880'};return`<span class="cal-dot" style="background:${tc.bg};color:${tc.c}" onclick="calSelDay(${yr},${mo},${day});event.stopPropagation()">${esc(it.text.length>12?it.text.slice(0,11)+'…':it.text)}</span>`;}).join('');const more=hits.length>2?`<span class="cal-more" onclick="calSelDay(${yr},${mo},${day})">+${hits.length-2}</span>`:'';html+=`<div class="cal-day${other?' other':''}${isT?' today':''}" onclick="calSelDay(${yr},${mo},${day})"><span class="cal-dn">${day}</span>${dots}${more}</div>`;}grid.innerHTML=html;if(calSel){const[sy,sm,sd]=calSel;if(sy===calY&&sm===calM)renderCalDet(sy,sm,sd);else document.getElementById('cal-det').classList.remove('show');}}
+function renderCal(){document.getElementById('cal-mo-lbl').textContent=CAL_MN[calM]+' '+calY;const grid=document.getElementById('cal-grid');const today=new Date();today.setHours(0,0,0,0);let html=DOW.map(d=>`<div class="cal-dow">${d}</div>`).join('');const first=new Date(calY,calM,1);let sdow=first.getDay()-1;if(sdow<0)sdow=6;const dim=new Date(calY,calM+1,0).getDate();const dimp=new Date(calY,calM,0).getDate();for(let cell=0;cell<42;cell++){let day,mo,yr,other=false;if(cell<sdow){day=dimp-sdow+cell+1;mo=calM-1;yr=calY;if(mo<0){mo=11;yr--;}other=true;}else if(cell-sdow>=dim){day=cell-sdow-dim+1;mo=calM+1;yr=calY;if(mo>11){mo=0;yr++;}other=true;}else{day=cell-sdow+1;mo=calM;yr=calY;}const isT=(yr===today.getFullYear()&&mo===today.getMonth()&&day===today.getDate());const hits=itemsOnDay(yr,mo,day);const pt=(it)=>(it.types||[it.type])[0];const dots=hits.slice(0,2).map(it=>{const tc=TC[pt(it)]||{bg:'#F2F0F7',c:'#6B6880'};return`<span class="cal-dot" style="background:${tc.bg};color:${tc.c}" onclick="calSelDay(${yr},${mo},${day});event.stopPropagation()">${esc(it.text.length>12?it.text.slice(0,11)+'…':it.text)}</span>`;}).join('');const more=hits.length>2?`<span class="cal-more" onclick="calSelDay(${yr},${mo},${day})">+${hits.length-2}</span>`:'';html+=`<div class="cal-day${other?' other':''}${isT?' today':''}" onclick="calSelDay(${yr},${mo},${day})"><span class="cal-dn">${day}</span>${dots}${more}</div>`;}grid.innerHTML=html;if(calSel){const[sy,sm,sd]=calSel;if(sy===calY&&sm===calM)renderCalDet(sy,sm,sd);else document.getElementById('cal-det').classList.remove('show');}}alM+1,0).getDate();const dimp=new Date(calY,calM,0).getDate();for(let cell=0;cell<42;cell++){let day,mo,yr,other=false;if(cell<sdow){day=dimp-sdow+cell+1;mo=calM-1;yr=calY;if(mo<0){mo=11;yr--;}other=true;}else if(cell-sdow>=dim){day=cell-sdow-dim+1;mo=calM+1;yr=calY;if(mo>11){mo=0;yr++;}other=true;}else{day=cell-sdow+1;mo=calM;yr=calY;}const isT=(yr===today.getFullYear()&&mo===today.getMonth()&&day===today.getDate());const hits=itemsOnDay(yr,mo,day);const pt=(it)=>(it.types||[it.type])[0];const dots=hits.slice(0,2).map(it=>{const tc=TC[pt(it)]||{bg:'#F2F0F7',c:'#6B6880'};return`<span class="cal-dot" style="background:${tc.bg};color:${tc.c}" onclick="calSelDay(${yr},${mo},${day});event.stopPropagation()">${esc(it.text.length>12?it.text.slice(0,11)+'…':it.text)}</span>`;}).join('');const more=hits.length>2?`<span class="cal-more" onclick="calSelDay(${yr},${mo},${day})">+${hits.length-2}</span>`:'';html+=`<div class="cal-day${other?' other':''}${isT?' today':''}" onclick="calSelDay(${yr},${mo},${day})"><span class="cal-dn">${day}</span>${dots}${more}</div>`;}grid.innerHTML=html;if(calSel){const[sy,sm,sd]=calSel;if(sy===calY&&sm===calM)renderCalDet(sy,sm,sd);else document.getElementById('cal-det').classList.remove('show';}
 function renderCalDet(y,m,d){const hits=itemsOnDay(y,m,d);const det=document.getElementById('cal-det');if(!hits.length){det.classList.remove('show');return;}document.getElementById('cal-det-title').textContent=`${d}. ${CAL_MN[m]} — ${hits.length} Eintrag${hits.length>1?'e':''}`;document.getElementById('cal-det-items').innerHTML=hits.map(it=>`<div class="cal-det-item"><button class="chk${it.done?' on':''}" onclick="toggle('${it.id}');renderCal();" style="flex-shrink:0;margin-top:1px"></button><div style="flex:1;min-width:0"><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:2px">${(it.types||[it.type]).map(t=>`<span class="badge badge-${t}">${{todo:'To-do',handoff:'Übergabe',watch:'Beobachten',idea:'💡'}[t]||t}</span>`).join('')}</div><div style="font-size:12px;color:var(--text);line-height:1.4">${esc(it.text)}</div></div><button class="del-btn" onclick="del('${it.id}');renderCal();">×</button></div>`).join('');det.classList.add('show');}
 
 // ── View ──
@@ -1005,32 +1005,13 @@ function setView(v){
 
 // ── Mobile nav ──
 function mobNav(s){mobSetNav(s);}
-function mobSetNav(section){
-  document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));
-  const btn=document.getElementById('mn-'+section);
-  if(btn)btn.classList.add('active');
-}
+
 
 // ── Focus input ──
-function focusInput(){
-  setView('list');
-  setTimeout(()=>{
-    const ta=document.getElementById('text-inp');
-    if(ta){ta.focus();ta.scrollIntoView({behavior:'smooth',block:'center'});}
-  },100);
-}
+function focusInput(){setView('list');setTimeout(()=>{const ta=document.getElementById('text-inp');if(ta){ta.focus();}},100);}
 
 // ── Update sidebar badge ──
-function updateSidebarBadge(){
-  const mine=items.filter(i=>!i.done&&myName&&(i.person===myName||(i.persons||[]).includes(myName))).length;
-  const badge=document.getElementById('badge-tasks');
-  if(badge)badge.textContent=mine||'';
-  // User info
-  const nameEl=document.getElementById('sb-user-name');
-  const avEl=document.getElementById('sb-avatar-initials');
-  if(nameEl&&myName){nameEl.textContent=myName;}
-  if(avEl&&myName){avEl.textContent=ini(myName);}
-}
+function updateSidebarBadge(){const mine=items.filter(i=>!i.done&&myName&&(i.person===myName||(i.persons||[]).includes(myName))).length;const b=document.getElementById('badge-tasks');if(b)b.textContent=mine||'';const nm=document.getElementById('sb-user-name');if(nm&&myName)nm.textContent=myName;const avEl=document.getElementById('sb-avatar-initials');if(avEl&&myName){avEl.textContent=ini(myName);}}
 
 // ── Datenschutz ──
 function toggleDatenschutz(){document.getElementById('datenschutz-detail').classList.toggle('show');}
@@ -1363,12 +1344,9 @@ onValue(medienRef,snap=>{
 // Register real functions and flush queued calls
 function openMedMDiwi(nr){openMedM(nr,null);}
 function openMedMTV(datum){openMedM(null,datum);}
-function closeHdrDD(){const dd=document.getElementById('hdr-dropdown');if(dd)dd.classList.remove('show');}
 function mobSetNav(s){document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));const btn=document.getElementById('mn-'+s);if(btn)btn.classList.add('active');}
-function focusInput(){setView('list');setTimeout(()=>{const ta=document.getElementById('text-inp');if(ta){ta.focus();ta.scrollIntoView({behavior:'smooth',block:'center'});}},100);}
-function updateSidebarBadge(){const mine=items.filter(i=>!i.done&&myName&&(i.person===myName||(i.persons||[]).includes(myName))).length;const b=document.getElementById('badge-tasks');if(b)b.textContent=mine||'';const nm=document.getElementById('sb-user-name');if(nm&&myName)nm.textContent=myName;const av=document.getElementById('sb-av');if(av&&myName)av.textContent=ini(myName);}
-function renderCal(){calSel=calSel||null;renderCalInner();}
-
+function focusInput(){setView('list');setTimeout(()=>{const ta=document.getElementById('text-inp');if(ta){ta.focus();}},100);}
+function updateSidebarBadge(){const mine=items.filter(i=>!i.done&&myName&&(i.person===myName||(i.persons||[]).includes(myName))).length;const b=document.getElementById('badge-tasks');if(b)b.textContent=mine||'';const nm=document.getElementById('sb-user-name');if(nm&&myName)nm.textContent=myName;const av=document.getElementById('sb-avatar-initials');if(av&&myName)av.textContent=ini(myName);}
 // ── Window exports ──
 window.setView=setView;window.setFilter=setFilter;window.setTagFilter=setTagFilter;
 window.addItem=addItem;window.saveMyName=saveMyName;
