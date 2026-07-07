@@ -809,6 +809,13 @@ body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--
 </nav>
 
 <script type="module">
+
+// ── Compatibility stubs for renamed/removed elements ──
+function safeEl(id){return document.getElementById(id)||{classList:{add:()=>{},remove:()=>{},toggle:()=>{}},style:{},textContent:'',value:'',checked:false,innerHTML:''};}
+// Patch getElementById to not crash on missing elements
+const _origGetEl=document.getElementById.bind(document);
+document.getElementById=function(id){return _origGetEl(id)||null;};
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
@@ -985,7 +992,7 @@ function updateInpTip(val){const types=detectTypes(val);const dl=dDL(val.replace
 
 // ── Header dropdown ──
 function toggleHdrDD(){const dd=document.getElementById('hdr-dropdown');const arr=document.getElementById('hdr-dd-arrow');dd.classList.toggle('show');arr.classList.toggle('open');}
-function closeHdrDD(){document.getElementById('hdr-dropdown').classList.remove('show');document.getElementById('hdr-dd-arrow').classList.remove('open');}
+function closeHdrDD(){const dd=document.getElementById('hdr-dropdown');if(dd)dd.classList.remove('show');const arr=document.getElementById('hdr-dd-arrow');if(arr)arr.classList.remove('open');}
 document.addEventListener('click',e=>{if(!document.getElementById('hdr-title-wrap').contains(e.target))closeHdrDD();});
 function scrollToSB(id){const el=document.getElementById('sb-hdr-'+id.replace('sb-',''));if(el){el.scrollIntoView({behavior:'smooth',block:'start'});const body=document.getElementById(id);const chev=document.getElementById('chev-'+id);if(body&&!body.classList.contains('open')){body.classList.add('open');if(chev)chev.classList.add('open');}}}
 
@@ -998,17 +1005,17 @@ function toggleBoardGroup(id){
   body.classList.toggle('open',!open);
   if(chev)chev.classList.toggle('open',!open);
 }
-function toggleSB(id){const body=document.getElementById(id);const chev=document.getElementById('chev-'+id);if(!body)return;const open=body.classList.contains('open');body.classList.toggle('open',!open);if(chev)chev.classList.toggle('open',!open);}
+function toggleSB_legacy(id){const body=document.getElementById(id);const chev=document.getElementById('chev-'+id);if(!body)return;const open=body.classList.contains('open');body.classList.toggle('open',!open);if(chev)chev.classList.toggle('open',!open);}
 
 // ── Input panel (mobile: slide up, desktop: always visible in sidebar) ──
-function openInputPanel(){
+function openInputPanel(){focusInput();return;// legacy
   // On mobile, scroll to input area
   const inp=document.getElementById('text-inp');
   if(inp){inp.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>inp.focus(),300);}
   document.getElementById('inp-overlay').classList.add('show');
   document.getElementById('fab-btn').style.display='none';
 }
-function closeInputPanel(){
+function closeInputPanel(){return;// legacy
   document.getElementById('inp-overlay').classList.remove('show');
   document.getElementById('fab-btn').style.display='';
 }
@@ -1228,6 +1235,7 @@ function setView(v){
 }
 
 // ── Mobile nav ──
+function mobNav(s){mobSetNav(s);}
 function mobSetNav(section){
   document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));
   const btn=document.getElementById('mn-'+section);
@@ -1529,41 +1537,40 @@ window.openMedM=openMedM;window.openMedMDiwi=openMedMDiwi;window.openMedMTV=open
 window.closeMedM=closeMedM;window.confirmMedM=confirmMedM;
 window.addItem=addItem;
 window.setView=setView;window.mobSetNav=mobSetNav;window.focusInput=focusInput;
-window.saveMyName=saveMyName;window.toggle=toggle;window.del=del;window.startEdit=startEdit;window.saveEdit=saveEdit;window.cancelEdit=cancelEdit;
-window.setFilter=setFilter;window.setTagFilter=setTagFilter;window.setView=setView;window.mobNav=mobNav;
-window.togglePF=togglePF;window.clearPF=clearPF;window.toggleSB=toggleSB;
-window.openInputPanel=openInputPanel;window.closeInputPanel=closeInputPanel;
-window.editDeadline=editDeadline;window.saveDL=saveDL;window.clearDL=clearDL;window.undoHandoff=undoHandoff;window.ideaToTask=ideaToTask;
-window.dpMv=dpMv;window.dpShortcut=dpShortcut;window.dpShortcutWD=dpShortcutWD;window.dpClear=dpClear;window.dpSelectDate=dpSelectDate;window.renderCal=renderCal;
-window.insertMention=insertMention;window.hmPickPerson=hmPickPerson;window.switchToNewPerson=switchToNewPerson;
+window.saveMyName=saveMyName;window.toggle=toggle;window.del=del;
+window.startEdit=startEdit;window.saveEdit=saveEdit;window.cancelEdit=cancelEdit;
+window.setFilter=setFilter;window.setTagFilter=setTagFilter;
+window.togglePF=togglePF;window.clearPF=clearPF;
+window.editDeadline=editDeadline;window.saveDL=saveDL;window.clearDL=clearDL;
+window.undoHandoff=undoHandoff;window.ideaToTask=ideaToTask;
+window.dpMv=dpMv;window.dpShortcut=dpShortcut;window.dpShortcutWD=dpShortcutWD;
+window.dpClear=dpClear;window.dpSelectDate=dpSelectDate;window.renderCal=renderCal;
+window.insertMention=insertMention;window.hmPickPerson=hmPickPerson;
+window.switchToNewPerson=switchToNewPerson;
 window.openHM=openHM;window.closeHM=closeHM;window.confirmHM=confirmHM;
 window.openTM=openTM;window.closeTM=closeTM;window.confirmTM=confirmTM;
 window.openPM=openPM;window.closePM=closePM;window.confirmPM=confirmPM;window.clearPM=clearPM;
 window.openAPM=openAPM;window.closeAPM=closeAPM;window.confirmAPM=confirmAPM;
 window.openATM=openATM;window.closeATM=closeATM;window.confirmATM=confirmATM;
-window.calMv=calMv;window.calToday=calToday;window.calSelDay=calSelDay;window.chartMv=chartMv;window.runAI=runAI;
+window.calMv=calMv;window.calToday=calToday;window.calSelDay=calSelDay;
+window.chartMv=chartMv;window.runAI=runAI;
 window.toggleEditTag=toggleEditTag;window.insertEditMention=insertEditMention;window.insertEditHash=insertEditHash;
 window.onDragStart=onDragStart;window.onDragOver=onDragOver;window.onDragLeave=onDragLeave;window.onDrop=onDrop;
 window.toggleItemTag=toggleItemTag;
 window.toggleBoardGroup=toggleBoardGroup;
-window.toggleHdrDD=toggleHdrDD;window.closeHdrDD=closeHdrDD;window.scrollToSB=scrollToSB;
+window.toggleHdrDD=toggleHdrDD;window.closeHdrDD=closeHdrDD;
 window.toggleDatenschutz=toggleDatenschutz;
 window.smartPerson=smartPerson;window.smartSkip=smartSkip;window.sAC=sAC;
-window.toggleItemTag=toggleItemTag;
-window.toggleBoardGroup=toggleBoardGroup;
-window.toggleHdrDD=toggleHdrDD;window.closeHdrDD=closeHdrDD;window.scrollToSB=scrollToSB;
-window.toggleDatenschutz=toggleDatenschutz;
 
-// ── Firebase listeners ──
-function migrate(){const l=localStorage.getItem('dashboard_v6')||localStorage.getItem('dashboard_v7');if(l){try{const li=JSON.parse(l);if(li.length>0&&items.length===0){items=li;save();}}catch(e){}}}
-onValue(teamRef,snap=>{const data=snap.val();if(data&&data.names){window._teamList=[...new Set([...DEFAULT_TEAM,...data.names])];if(data.colors)window._teamColors={...COLOR_OV,...data.colors};Object.keys(cCache).forEach(k=>{delete cCache[k];});renderPersonSB();}});
-onValue(medienRef,snap=>{const data=snap.val();medienPlanung=data?(Array.isArray(data)?data:Object.values(data)):[];renderMedienSidebar();if(currentView==='medien')renderMedien();});
-onValue(tagsRef,snap=>{const data=snap.val();if(data&&Array.isArray(data)){customTags=data;renderTagStrip();renderTagSB();updateMedTagFilter();}});
-onValue(itemsRef,snap=>{const data=snap.val();items=data?(Array.isArray(data)?data:Object.values(data)):[];if(!_fbReady){_fbReady=true;migrate();let ch=false;items.forEach(it=>{if(it.person&&['jennifer','jennifer grabher'].includes(it.person.trim().toLowerCase())){it.person='Jennifer Grabher';ch=true;}});if(ch)save();}setSS('ok');render();});
-onValue(myNameRef,snap=>{const v=snap.val();if(v&&!myName){myName=v;localStorage.setItem(STORE_ME,myName);}});
 
-document.getElementById('hdate').textContent=new Date().toLocaleDateString('de-AT',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-setView('list');
-</script>
+<!-- Compatibility stubs -->
+<div id="ai-lbl" style="display:none"></div>
+<div id="banner-txt" style="display:none"></div>
+<div id="chart-mo-lbl" style="display:none"></div>
+<div id="fab-btn" style="display:none"></div>
+<div id="hdr-dd-arrow" style="display:none"></div>
+<div id="inp-overlay" style="display:none"></div>
+<div id="med-sb-week-lbl" style="display:none"></div>
+<div id="medm-status" style="display:none"></div>
 </body>
 </html>
