@@ -808,14 +808,93 @@ body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--
   </button>
 </nav>
 
+<script>
+// Early global dispatch — runs before module script loads
+// All onclick handlers call these which then delegate to module functions
+window._dispatch=function(fn,...args){
+  if(typeof window[fn]==='function')window[fn](...args);
+  else window._pending=(window._pending||[]).push({fn,args});
+};
+// Shorthands used in HTML onclick
+window.setView=function(v){window._dispatch('setView',v);};
+window.setFilter=function(f){window._dispatch('setFilter',f);};
+window.setTagFilter=function(t){window._dispatch('setTagFilter',t);};
+window.focusInput=function(){window._dispatch('focusInput');};
+window.mobSetNav=function(s){window._dispatch('mobSetNav',s);};
+window.chartMv=function(d){window._dispatch('chartMv',d);};
+window.calMv=function(d){window._dispatch('calMv',d);};
+window.calToday=function(){window._dispatch('calToday');};
+window.calSelDay=function(y,m,d){window._dispatch('calSelDay',y,m,d);};
+window.openHM=function(id){window._dispatch('openHM',id);};
+window.closeHM=function(){window._dispatch('closeHM');};
+window.confirmHM=function(){window._dispatch('confirmHM');};
+window.hmPickPerson=function(n){window._dispatch('hmPickPerson',n);};
+window.openTM=function(id){window._dispatch('openTM',id);};
+window.closeTM=function(){window._dispatch('closeTM');};
+window.confirmTM=function(){window._dispatch('confirmTM');};
+window.openPM=function(id,p,idx){window._dispatch('openPM',id,p,idx);};
+window.closePM=function(){window._dispatch('closePM');};
+window.confirmPM=function(){window._dispatch('confirmPM');};
+window.clearPM=function(){window._dispatch('clearPM');};
+window.switchToNewPerson=function(){window._dispatch('switchToNewPerson');};
+window.openAPM=function(){window._dispatch('openAPM');};
+window.closeAPM=function(){window._dispatch('closeAPM');};
+window.confirmAPM=function(){window._dispatch('confirmAPM');};
+window.openATM=function(){window._dispatch('openATM');};
+window.closeATM=function(){window._dispatch('closeATM');};
+window.confirmATM=function(){window._dispatch('confirmATM');};
+window.openMedM=function(a,b){window._dispatch('openMedM',a,b);};
+window.openMedMDiwi=function(n){window._dispatch('openMedMDiwi',n);};
+window.openMedMTV=function(d){window._dispatch('openMedMTV',d);};
+window.closeMedM=function(){window._dispatch('closeMedM');};
+window.confirmMedM=function(){window._dispatch('confirmMedM');};
+window.analyzeMedText=function(){window._dispatch('analyzeMedText');};
+window.addItem=function(){window._dispatch('addItem');};
+window.saveMyName=function(){window._dispatch('saveMyName');};
+window.toggle=function(id){window._dispatch('toggle',id);};
+window.del=function(id){window._dispatch('del',id);};
+window.startEdit=function(id){window._dispatch('startEdit',id);};
+window.saveEdit=function(id){window._dispatch('saveEdit',id);};
+window.cancelEdit=function(){window._dispatch('cancelEdit');};
+window.editDeadline=function(id){window._dispatch('editDeadline',id);};
+window.saveDL=function(id){window._dispatch('saveDL',id);};
+window.clearDL=function(id){window._dispatch('clearDL',id);};
+window.undoHandoff=function(id){window._dispatch('undoHandoff',id);};
+window.ideaToTask=function(id){window._dispatch('ideaToTask',id);};
+window.dpMv=function(d){window._dispatch('dpMv',d);};
+window.dpShortcut=function(d){window._dispatch('dpShortcut',d);};
+window.dpShortcutWD=function(d){window._dispatch('dpShortcutWD',d);};
+window.dpClear=function(){window._dispatch('dpClear');};
+window.dpSelectDate=function(y,m,d){window._dispatch('dpSelectDate',y,m,d);};
+window.insertMention=function(n){window._dispatch('insertMention',n);};
+window.insertEditMention=function(id,n){window._dispatch('insertEditMention',id,n);};
+window.insertEditHash=function(id,t){window._dispatch('insertEditHash',id,t);};
+window.toggleEditTag=function(id,t){window._dispatch('toggleEditTag',id,t);};
+window.toggleItemTag=function(id,t){window._dispatch('toggleItemTag',id,t);};
+window.toggleBoardGroup=function(id){window._dispatch('toggleBoardGroup',id);};
+window.togglePF=function(n){window._dispatch('togglePF',n);};
+window.clearPF=function(){window._dispatch('clearPF');};
+window.runAI=function(){window._dispatch('runAI');};
+window.setMedView=function(v){window._dispatch('setMedView',v);};
+window.medNavPeriod=function(d){window._dispatch('medNavPeriod',d);};
+window.medClickDay=function(ds,wi){window._dispatch('medClickDay',ds,wi);};
+window.delMed=function(id){window._dispatch('delMed',id);};
+window.openMedienKanal=function(k){window._dispatch('openMedienKanal',k);};
+window.toggleDatenschutz=function(){window._dispatch('toggleDatenschutz');};
+window.toggleHdrDD=function(){window._dispatch('toggleHdrDD');};
+window.closeHdrDD=function(){window._dispatch('closeHdrDD');};
+window.smartPerson=function(n){window._dispatch('smartPerson',n);};
+window.smartSkip=function(){window._dispatch('smartSkip');};
+window.sAC=function(n,i,a){window._dispatch('sAC',n,i,a);};
+window.onDragStart=function(e,id){window._dispatch('onDragStart',e,id);};
+window.onDragOver=function(e){window._dispatch('onDragOver',e);};
+window.onDragLeave=function(e){window._dispatch('onDragLeave',e);};
+window.onDrop=function(e,id){window._dispatch('onDrop',e,id);};
+window.scrollToSB=function(){};
+window.mobNav=function(s){window.mobSetNav(s);};
+</script>
+
 <script type="module">
-
-// ── Compatibility stubs for renamed/removed elements ──
-function safeEl(id){return document.getElementById(id)||{classList:{add:()=>{},remove:()=>{},toggle:()=>{}},style:{},textContent:'',value:'',checked:false,innerHTML:''};}
-// Patch getElementById to not crash on missing elements
-const _origGetEl=document.getElementById.bind(document);
-document.getElementById=function(id){return _origGetEl(id)||null;};
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
@@ -1536,7 +1615,7 @@ window.analyzeMedText=analyzeMedText;
 window.openMedM=openMedM;window.openMedMDiwi=openMedMDiwi;window.openMedMTV=openMedMTV;
 window.closeMedM=closeMedM;window.confirmMedM=confirmMedM;
 window.addItem=addItem;
-window.setView=setView;window.mobSetNav=mobSetNav;window.focusInput=focusInput;
+window.setView=setView;window.mobSetNav=mobSetNav;window.focusInput=focusInput;window.mobNav=s=>mobSetNav(s);
 window.saveMyName=saveMyName;window.toggle=toggle;window.del=del;
 window.startEdit=startEdit;window.saveEdit=saveEdit;window.cancelEdit=cancelEdit;
 window.setFilter=setFilter;window.setTagFilter=setTagFilter;
@@ -1561,6 +1640,7 @@ window.toggleBoardGroup=toggleBoardGroup;
 window.toggleHdrDD=toggleHdrDD;window.closeHdrDD=closeHdrDD;
 window.toggleDatenschutz=toggleDatenschutz;
 window.smartPerson=smartPerson;window.smartSkip=smartSkip;window.sAC=sAC;
+window.updateSidebarBadge=updateSidebarBadge;window.scrollToSB=()=>{};
 
 
 <!-- Compatibility stubs -->
