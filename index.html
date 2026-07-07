@@ -474,7 +474,7 @@ body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--
           <div class="stat-mini" style="background:var(--watch-bg);cursor:pointer" id="s-watch" onclick="setFilter('watch');setView('list')"><div class="stat-mini-n" style="color:var(--watch-c)">0</div><div class="stat-mini-l" style="color:var(--watch-c)">Beobachten</div></div>
         </div>
         <div class="sb-divider"></div>
-        <div class="chart-nav"><button class="cnav-btn" onclick="chartMv(-1)">&lsaquo;</button><span class="chart-mo" id="hdate"></span><button class="cnav-btn" onclick="chartMv(1)">&rsaquo;</button></div>
+        <div class="chart-nav"><button class="cnav-btn" onclick="chartMv(-1)">&lsaquo;</button><span class="chart-mo" id="chart-mo-lbl"></span><button class="cnav-btn" onclick="chartMv(1)">&rsaquo;</button></div>
         <div class="chart-wrap"><canvas id="donut" width="60" height="60" style="flex-shrink:0"></canvas><div class="chart-legend" id="chart-leg"></div></div>
         <div class="sb-divider"></div>
         <div style="display:flex;align-items:center;gap:4px;margin-bottom:5px"><span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);flex:1">Schwerpunkte</span><button class="sb-plus" onclick="openATM()">+</button></div>
@@ -497,7 +497,7 @@ body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--
     <div class="sb-bottom">
       <div id="sync-st" style="font-size:11px;color:var(--text3);margin-bottom:6px"></div>
       <div class="sb-user">
-        <div class="sb-avatar" id="sb-av">?</div>
+        <div class="sb-avatar" id="sb-avatar-initials">?</div>
         <div><div style="font-size:12px;font-weight:500" id="sb-user-name">&#8212;</div><div style="font-size:11px;color:var(--text3)">Sparte IC</div></div>
       </div>
     </div>
@@ -550,7 +550,7 @@ body{font-family:-apple-system,'Segoe UI',system-ui,sans-serif;background:var(--
           <div class="ai-tf" id="ai-tf"><button class="ai-tf-btn active" data-days="7">7 Tage</button><button class="ai-tf-btn" data-days="14">14 Tage</button><button class="ai-tf-btn" data-days="30">30 Tage</button></div>
           <div class="ai-text" id="ai-txt"></div>
         </div>
-        <div class="p-banner" id="p-banner"><span id="p-banner-name"></span><button class="clear-p" onclick="clearPF()">&#215;</button></div>
+        <div class="p-banner" id="p-banner"><span id="banner-txt"></span><button class="clear-p" onclick="clearPF()">&#215;</button></div>
         <div class="fbar" id="fbar">
           <button class="f-btn active" data-f="all">Alle</button>
           <button class="f-btn" data-f="mine">Meine To-dos</button>
@@ -1361,42 +1361,56 @@ onValue(medienRef,snap=>{
 })();
 
 // Register real functions and flush queued calls
-var _realFns={
-  setView,setFilter,setTagFilter,focusInput,mobSetNav,
-  chartMv,calMv,calToday,calSelDay,addItem,saveMyName,
-  toggle,del,startEdit,saveEdit,cancelEdit,
-  editDeadline,saveDL,clearDL,undoHandoff,ideaToTask,
-  openHM,closeHM,confirmHM,hmPickPerson,
-  openTM,closeTM,confirmTM,
-  openPM,closePM,confirmPM,clearPM,switchToNewPerson,
-  openAPM,closeAPM,confirmAPM,
-  openATM,closeATM,confirmATM,
-  openMedM,openMedMDiwi,openMedMTV,closeMedM,confirmMedM,analyzeMedText,
-  dpMv,dpShortcut,dpShortcutWD,dpClear,dpSelectDate,
-  insertMention,insertEditMention,insertEditHash,
-  toggleEditTag,toggleItemTag,toggleBoardGroup,
-  togglePF,clearPF,runAI,
-  setMedView,medNavPeriod,medClickDay,delMed,openMedienKanal,
-  renderMedienSidebar,renderMedien,renderCal,
-  toggleDatenschutz,toggleHdrDD,closeHdrDD,
-  smartPerson,smartSkip,sAC,
-  onDragStart,onDragOver,onDragLeave,onDrop,
-  updateSidebarBadge,toggleMedKanal,
-  calSelDay,hmPickPerson,
-};
-Object.keys(_realFns).forEach(function(fn){
-  window['_real_'+fn]=_realFns[fn];
-  window[fn]=_realFns[fn];
-});
-window.mobNav=s=>mobSetNav(s);
-window.scrollToSB=()=>{};
-window._ready=true;
-// Flush queued calls
-(window._q||[]).forEach(function(item){
-  if(typeof window[item.fn]==='function')window[item.fn].apply(null,item.args);
-});
-window._q=[];
+function openMedMDiwi(nr){openMedM(nr,null);}
+function openMedMTV(datum){openMedM(null,datum);}
+function closeHdrDD(){const dd=document.getElementById('hdr-dropdown');if(dd)dd.classList.remove('show');}
+function mobSetNav(s){document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));const btn=document.getElementById('mn-'+s);if(btn)btn.classList.add('active');}
+function focusInput(){setView('list');setTimeout(()=>{const ta=document.getElementById('text-inp');if(ta){ta.focus();ta.scrollIntoView({behavior:'smooth',block:'center'});}},100);}
+function updateSidebarBadge(){const mine=items.filter(i=>!i.done&&myName&&(i.person===myName||(i.persons||[]).includes(myName))).length;const b=document.getElementById('badge-tasks');if(b)b.textContent=mine||'';const nm=document.getElementById('sb-user-name');if(nm&&myName)nm.textContent=myName;const av=document.getElementById('sb-av');if(av&&myName)av.textContent=ini(myName);}
+function renderCal(){calSel=calSel||null;renderCalInner();}
+
+// ── Window exports ──
+window.setView=setView;window.setFilter=setFilter;window.setTagFilter=setTagFilter;
+window.addItem=addItem;window.saveMyName=saveMyName;
+window.toggle=toggle;window.del=del;window.startEdit=startEdit;
+window.saveEdit=saveEdit;window.cancelEdit=cancelEdit;
+window.editDeadline=editDeadline;window.saveDL=saveDL;window.clearDL=clearDL;
+window.undoHandoff=undoHandoff;window.ideaToTask=ideaToTask;
+window.togglePF=togglePF;window.clearPF=clearPF;
+window.openHM=openHM;window.closeHM=closeHM;window.confirmHM=confirmHM;window.hmPickPerson=hmPickPerson;
+window.openTM=openTM;window.closeTM=closeTM;window.confirmTM=confirmTM;
+window.openPM=openPM;window.closePM=closePM;window.confirmPM=confirmPM;
+window.clearPM=clearPM;window.switchToNewPerson=switchToNewPerson;
+window.openAPM=openAPM;window.closeAPM=closeAPM;window.confirmAPM=confirmAPM;
+window.openATM=openATM;window.closeATM=closeATM;window.confirmATM=confirmATM;
+window.openMedM=openMedM;window.openMedMDiwi=openMedMDiwi;window.openMedMTV=openMedMTV;
+window.closeMedM=closeMedM;window.confirmMedM=confirmMedM;window.analyzeMedText=analyzeMedText;
+window.delMed=delMed;window.medClickDay=medClickDay;window.medNavPeriod=medNavPeriod;
+window.setMedView=setMedView;window.openMedienKanal=openMedienKanal;
+window.calMv=calMv;window.calToday=calToday;window.calSelDay=calSelDay;
+window.chartMv=chartMv;window.runAI=runAI;
+window.dpMv=dpMv;window.dpShortcut=dpShortcut;window.dpShortcutWD=dpShortcutWD;
+window.dpClear=dpClear;window.dpSelectDate=dpSelectDate;
+window.insertMention=insertMention;window.insertEditMention=insertEditMention;
+window.insertEditHash=insertEditHash;
+window.toggleEditTag=toggleEditTag;window.toggleItemTag=toggleItemTag;
+window.onDragStart=onDragStart;window.onDragOver=onDragOver;
+window.onDragLeave=onDragLeave;window.onDrop=onDrop;
+window.toggleBoardGroup=toggleBoardGroup;
+window.toggleDatenschutz=toggleDatenschutz;
+window.toggleHdrDD=toggleHdrDD;window.closeHdrDD=closeHdrDD;
+window.smartPerson=smartPerson;window.smartSkip=smartSkip;window.sAC=sAC;
+window.mobNav=mobNav;window.mobSetNav=mobSetNav;window.focusInput=focusInput;
+window.openInputPanel=openInputPanel;window.closeInputPanel=closeInputPanel;
+window.renderMedienSidebar=renderMedienSidebar;window.renderMedien=renderMedien;
+window.scrollToSB=()=>{};window.toggleSB=()=>{};window.toggleMedKanal=toggleMedKanal;
 
 </script>
+
+<!-- Elements required by JS -->
+<div id="hdr-title-wrap" style="display:none"></div>
+<div id="hdr-dropdown" style="display:none"></div>
+<div id="ai-lbl" style="display:none"></div>
+<div id="med-sb-week-lbl" style="display:none"></div>
 </body>
 </html>
